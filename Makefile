@@ -45,6 +45,9 @@ clean-test:
 	rm -f .coverage
 	rm -fr htmlcov/
 
+setup:
+	pip install -r requirements_dev.txt
+
 lint:
 	flake8 multiaddr tests
 
