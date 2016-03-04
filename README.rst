@@ -13,7 +13,7 @@ Multiaddr
         :alt: Documentation Status
 
 
-Python implementation os jbenet's multiaddr
+Python implementation of [jbenet](https://github.com/jbenet)'s [multiaddr](https://github.com/jbenet/multiaddr).
 
 * Free software: MIT License
 * Documentation: https://multiaddr.readthedocs.org.

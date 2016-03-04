@@ -47,7 +47,7 @@ version = load_version()
 setup(
     name='multiaddr',
     version=version,
-    description="Python implementation os jbenet's multiaddr",
+    description="Python implementation of jbenet's multiaddr",
     long_description=readme + '\n\n' + history,
     author="Steven Buss",
     author_email='steven.buss@gmail.com',
@@ -57,8 +57,7 @@ setup(
     packages=[
         'multiaddr',
     ],
-    package_dir={'multiaddr':
-                 'multiaddr'},
+    package_dir={'multiaddr': 'multiaddr'},
     include_package_data=True,
     install_requires=requirements,
     license='MIT License',
@@ -69,7 +68,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
