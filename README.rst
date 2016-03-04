@@ -15,7 +15,7 @@ Multiaddr
 
 Python implementation os jbenet's multiaddr
 
-* Free software: ISC license
+* Free software: MIT License
 * Documentation: https://multiaddr.readthedocs.org.
 
 Features
