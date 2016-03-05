@@ -6,7 +6,7 @@ Multiaddr
         :target: https://pypi.python.org/pypi/multiaddr
 
 .. image:: https://img.shields.io/travis/sbuss/multiaddr.svg
-        :target: https://travis-ci.org/sbuss/multiaddr
+        :target: https://travis-ci.org/sbuss/py-multiaddr
 
 .. image:: https://readthedocs.org/projects/multiaddr/badge/?version=latest
         :target: https://readthedocs.org/projects/multiaddr/?badge=latest
