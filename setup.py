@@ -70,6 +70,7 @@ setup(
     install_requires=[
         'varint',
         'six',
+        'base58',
     ],
     test_suite='tests',
     tests_require=[
