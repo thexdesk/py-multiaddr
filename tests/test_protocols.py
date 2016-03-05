@@ -63,8 +63,8 @@ def test_protocol_with_name():
     assert proto.name == 'ip4'
     assert proto.code == protocols.P_IP4
 
-    proto = protocols.protocol_with_name('foo')
-    assert proto is protocols.NULL_PROTOCOL
+    with pytest.raises(ValueError):
+        proto = protocols.protocol_with_name('foo')
 
 
 def test_protocol_with_code():
@@ -72,8 +72,8 @@ def test_protocol_with_code():
     assert proto.name == 'ip4'
     assert proto.code == protocols.P_IP4
 
-    proto = protocols.protocol_with_code(1234)
-    assert proto is protocols.NULL_PROTOCOL
+    with pytest.raises(ValueError):
+        proto = protocols.protocol_with_code(1234)
 
 
 @pytest.mark.parametrize("names", [['ip4'],
