@@ -1,3 +1,5 @@
+import binascii
+
 from .codec import bytes_split
 from .multiaddr import Multiaddr
 
@@ -7,7 +9,7 @@ def split(ma):
     addrs = []
     bb = bytes_split(ma.to_bytes())
     for addr in bb:
-        addrs.append(Multiaddr(bytes_addr=addr))
+        addrs.append(Multiaddr(bytes_addr=binascii.hexlify(addr)))
     return addrs
 
 
