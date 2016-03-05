@@ -127,7 +127,7 @@ def address_string_to_bytes(proto, addr_string):
     elif proto.code == P_IPFS:  # ipfs
         # the address is a varint prefixed multihash string representation
         try:
-            mm = base58.b58decode(addr_string)
+            mm = binascii.hexlify(base58.b58decode(addr_string))
         except Exception as ex:
             raise ValueError("failed to parse ipfs addr: %s %s"
                              % (addr_string, str(ex)))
@@ -147,7 +147,7 @@ def address_bytes_to_string(proto, buf):
         buf = buf[num_bytes_read:]
         if len(buf) != size:
             raise ValueError("inconsistent lengths")
-        return base58.b58encode(buf)
+        return base58.b58encode(binascii.unhexlify(buf))
     raise ValueError("unknown protocol")
 
 
