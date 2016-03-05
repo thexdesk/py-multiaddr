@@ -98,7 +98,10 @@ def _uvarint(buf):
     x = 0
     s = 0
     for i, b_str in enumerate(buf):
-        b = int(binascii.b2a_hex(b_str), 16)
+        if six.PY3:
+            b = b_str
+        else:
+            b = int(binascii.b2a_hex(b_str), 16)
         if b < 0x80:
             if i > 9 | i == 9 and b > 1:
                 raise ValueError("Overflow")
