@@ -165,7 +165,7 @@ def address_bytes_to_string(proto, buf):
 
 def size_for_addr(proto, buf):
     if proto.size > 0:
-        return proto.size / 8
+        return proto.size // 8
     elif proto.size == 0:
         return 0
     else:
