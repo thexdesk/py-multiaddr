@@ -89,9 +89,6 @@ def address_string_to_bytes(proto, addr_string):
         if ip >= 65536:
             raise ValueError("failed to parse %s addr: %s" %
                              (proto.name, "greater than 65536"))
-        # b := make([]byte, 2)
-        # binary.BigEndian.PutUint16(b, uint16(i))
-        # return b, nil
         return binascii.hexlify(struct.pack('>I', ip)[-2:])
     elif proto.code == P_ONION:
         addr = addr_string.split(":")
