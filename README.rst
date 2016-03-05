@@ -24,7 +24,8 @@ Python implementation of jbenet_'s multiaddr_
 Example
 -------
 
-### Simple ###
+Simple
+~~~~~~
 
 .. code-block:: python
 
@@ -45,7 +46,8 @@ Example
     assert not (m2 != m1)
 
 
-### Protocols ###
+Protocols
+~~~~~~~~~
 
 .. code-block:: python
 
@@ -59,7 +61,8 @@ Example
     #    Protocol(code=17, name='udp', size=16)]
 
 
-### En/decapsulate ###
+En/decapsulate
+~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -72,7 +75,8 @@ Example
     # <Multiaddr /ip4/127.0.0.1>
 
 
-### Tunneling ###
+Tunneling
+~~~~~~~~~
 
 Multiaddr allows expressing tunnels very nicely.
 
