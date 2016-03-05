@@ -1,5 +1,7 @@
 import base58
 import base64
+import binascii
+import struct
 
 from netaddr import IPAddress
 
@@ -88,7 +90,7 @@ def address_string_to_bytes(proto, addr_string):
         # b := make([]byte, 2)
         # binary.BigEndian.PutUint16(b, uint16(i))
         # return b, nil
-        return ip
+        return binascii.hexlify(struct.pack('>I', ip)[-2:])
     elif proto.code == P_ONION:
         addr = addr_string.split(":")
         if len(addr) != 2:
@@ -139,7 +141,7 @@ def address_bytes_to_string(proto, buf):
     if proto.code in [P_IP4, P_IP6]:
         return str(IPAddress(int(buf, 16)))
     elif proto.code in [P_TCP, P_UDP, P_DCCP, P_SCTP]:
-        return str(buf)
+        return struct.unpack('>I', binascii.unhexlify(buf))
     elif proto.code == P_IPFS:
         size, num_bytes_read = read_varint_code(buf)
         buf = buf[num_bytes_read:]
