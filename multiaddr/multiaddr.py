@@ -113,5 +113,14 @@ class Multiaddr(object):
         from .util import split
         for sub_addr in split(self):
             if sub_addr.protocols()[0].code == code:
-                return str(sub_addr).split("/")[-1]
+                addr_parts = str(sub_addr).split("/")
+                if len(addr_parts) > 3:
+                    raise ValueError("Unknown Protocol format")
+                elif len(addr_parts) == 3:
+                    # If we have an address, return it
+                    return addr_parts[2]
+                elif len(addr_parts) == 2:
+                    # We were given something like '/utp', which doesn't have
+                    # an address, so return ''
+                    return ''
         raise ProtocolNotFoundException()
