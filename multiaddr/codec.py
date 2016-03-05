@@ -1,6 +1,7 @@
 import base58
 import base64
 import binascii
+import six
 import struct
 
 from netaddr import IPAddress
@@ -42,7 +43,7 @@ def string_to_bytes(string):
                 "protocol requires address, none given: %s" % proto.name)
         addr_string = sp.pop(0)
         addr_bytes = address_string_to_bytes(proto, addr_string)
-        bs.append(bytes(addr_bytes))
+        bs.append(six.b(addr_bytes))
     return b''.join(bs)
 
 
