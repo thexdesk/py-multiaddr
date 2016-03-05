@@ -61,12 +61,13 @@ def bytes_to_string(buf):
 
 
 def address_string_to_bytes(proto, addr_string):
+    from .util import int_to_hex
     if proto.code == P_IP4:  # ipv4
         try:
             ip = IPAddress(addr_string)
             if ip.version != 4:
                 raise ValueError("failed to parse ip4 addr: %s" % addr_string)
-            return '%x' % int(ip)
+            return int_to_hex(int(ip), 8)
         except Exception:
             raise ValueError("failed to parse ip4 addr: %s" % addr_string)
     elif proto.code == P_IP6:  # ipv6
@@ -74,7 +75,7 @@ def address_string_to_bytes(proto, addr_string):
             ip = IPAddress(addr_string)
             if ip.version != 6:
                 raise ValueError("failed to parse ip6 addr: %s" % addr_string)
-            return '%x' % int(ip)
+            return int_to_hex(int(ip), 32)
         except Exception:
             raise ValueError("failed to parse ip6 addr: %s" % addr_string)
     # tcp udp dccp sctp
