@@ -1,3 +1,4 @@
 varint
 six
 base58
+netaddr
