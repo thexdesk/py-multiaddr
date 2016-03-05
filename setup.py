@@ -68,10 +68,11 @@ setup(
         'Programming Language :: Python :: 3.5',
     ],
     install_requires=[
-        # TODO: put package requirements here
+        'varint',
+        'six',
     ],
     test_suite='tests',
     tests_require=[
-        # TODO: put package test requirements here
+        'pytest',
     ],
 )
