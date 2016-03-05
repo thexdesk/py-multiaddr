@@ -27,6 +27,7 @@ Example
 ### Simple ###
 
 .. code-block:: python
+
     from multiaddr import Multiaddr
 
     # construct from a string
@@ -47,6 +48,7 @@ Example
 ### Protocols ###
 
 .. code-block:: python
+
     from multiaddr import Multiaddr
 
     m1 = Multiaddr("/ip4/127.0.0.1/udp/1234")
@@ -60,6 +62,7 @@ Example
 ### En/decapsulate ###
 
 .. code-block:: python
+
     from multiaddr import Multiaddr
 
     m1 = Multiaddr("/ip4/127.0.0.1/udp/1234")
@@ -75,6 +78,7 @@ Multiaddr allows expressing tunnels very nicely.
 
 
 .. code-block:: python
+
     printer = Multiaddr("/ip4/192.168.0.13/tcp/80")
     proxy = Multiaddr("/ip4/10.20.30.40/tcp/443")
     printerOverProxy = proxy.encapsulate(printer)
