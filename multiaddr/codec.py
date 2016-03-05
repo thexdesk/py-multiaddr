@@ -132,6 +132,9 @@ def address_string_to_bytes(proto, addr_string):
             raise ValueError("failed to parse ipfs addr: %s %s"
                              % (addr_string, str(ex)))
         size = code_to_varint(len(mm))
+        if len(mm) < 10:
+            # TODO - port go-multihash so we can do this correctly
+            raise ValueError("invalid IPFS multihash: %s" % mm)
         return b''.join([size, mm])
     else:
         raise ValueError("failed to parse %s addr: unknown" % proto.name)
