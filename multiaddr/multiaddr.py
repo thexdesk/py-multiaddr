@@ -103,7 +103,7 @@ class Multiaddr(object):
             # if multiaddr not contained, returns a copy
             return copy(self)
         try:
-            return Multiaddr(bytes_addr=s1[:idx])
+            return Multiaddr(s1[:idx])
         except:
             raise ValueError(
                 "Multiaddr.decapsulate incorrect byte boundaries.")
