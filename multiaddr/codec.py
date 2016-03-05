@@ -128,11 +128,12 @@ def address_string_to_bytes(proto, addr_string):
     elif proto.code == P_IPFS:  # ipfs
         # the address is a varint prefixed multihash string representation
         try:
-            mm = binascii.hexlify(base58.b58decode(addr_string))
+            mm = base58.b58decode(addr_string)
         except Exception as ex:
             raise ValueError("failed to parse ipfs addr: %s %s"
                              % (addr_string, str(ex)))
         size = code_to_varint(len(mm))
+        mm = binascii.hexlify(mm)
         if len(mm) < 10:
             # TODO - port go-multihash so we can do this correctly
             raise ValueError("invalid IPFS multihash: %s" % mm)
@@ -148,11 +149,12 @@ def address_bytes_to_string(proto, buf):
         return str(struct.unpack(
             '>I', b''.join([b'\x00\x00', binascii.unhexlify(buf)]))[0])
     elif proto.code == P_IPFS:
+        buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
         buf = buf[num_bytes_read:]
         if len(buf) != size:
             raise ValueError("inconsistent lengths")
-        return base58.b58encode(binascii.unhexlify(buf))
+        return base58.b58encode(buf)
     raise ValueError("unknown protocol")
 
 

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import binascii
 from copy import copy
 
 from .codec import size_for_addr
@@ -68,15 +69,15 @@ class Multiaddr(object):
 
     def protocols(self):
         """Returns a list of Protocols this Multiaddr includes."""
-        bb = self.to_bytes()
+        buf = binascii.unhexlify(self.to_bytes())
         protos = []
-        while bb:
-            code, num_bytes_read = read_varint_code(bb)
+        while buf:
+            code, num_bytes_read = read_varint_code(buf)
             proto = protocol_with_code(code)
             protos.append(proto)
-            bb = bb[num_bytes_read:]
-            size = size_for_addr(proto, bb) * 2
-            bb = bb[size:]
+            buf = buf[num_bytes_read:]
+            size = size_for_addr(proto, buf)
+            buf = buf[size:]
         return protos
 
     def encapsulate(self, other):
