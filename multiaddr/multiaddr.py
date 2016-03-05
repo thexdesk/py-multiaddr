@@ -111,8 +111,7 @@ class Multiaddr(object):
     def value_for_protocol(self, code):
         """Return the value (if any) following the specified protocol."""
         from .util import split
-        for sub_proto in split(self):
-            proto = sub_proto.protocols()[0]
-            if proto.code == code:
-                return str(proto).split("/")[2]
+        for sub_addr in split(self):
+            if sub_addr.protocols()[0].code == code:
+                return str(sub_addr).split("/")[-1]
         raise ProtocolNotFoundException()
