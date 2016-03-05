@@ -147,9 +147,9 @@ def address_bytes_to_string(proto, buf):
     if proto.code in [P_IP4, P_IP6]:
         return str(IPAddress(int(buf, 16)))
     elif proto.code in [P_TCP, P_UDP, P_DCCP, P_SCTP]:
+        buf = buf.zfill(size_for_addr(proto, buf) * 4)
         buf = binascii.unhexlify(buf)
-        return str(struct.unpack(
-            '>I', b''.join([b'\x00\x00', buf]))[0])
+        return str(struct.unpack('>I', buf)[0])
     elif proto.code == P_IPFS:
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
