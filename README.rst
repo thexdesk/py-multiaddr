@@ -57,8 +57,7 @@ Protocols
 
     # get the multiaddr protocol description objects
     m1.protocols()
-    #   [Protocol(code=4, name='ip4', size=32),
-    #    Protocol(code=17, name='udp', size=16)]
+    # [Protocol(code=4, name='ip4', size=32), Protocol(code=17, name='udp', size=16)]
 
 
 En/decapsulate
