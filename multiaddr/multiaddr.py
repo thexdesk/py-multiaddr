@@ -104,9 +104,10 @@ class Multiaddr(object):
             return copy(self)
         try:
             return Multiaddr(s1[:idx])
-        except:
+        except Exception as ex:
             raise ValueError(
-                "Multiaddr.decapsulate incorrect byte boundaries.")
+                "Multiaddr.decapsulate incorrect byte boundaries: %s"
+                % str(ex))
 
     def value_for_protocol(self, code):
         """Return the value (if any) following the specified protocol."""
