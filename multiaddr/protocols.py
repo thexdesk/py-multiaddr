@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import binascii
 import six
 import varint
 
@@ -73,14 +74,48 @@ class Protocol(object):
                    self.name == other.name,
                    self.vcode == other.vcode)
 
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __repr__(self):
+        return "Protocol(code={code}, name='{name}', size={size})".format(
+                code=self.code,
+                size=self.size,
+                name=self.name)
+
 
 def code_to_varint(num):
-    """Convert an integer to a varint-encoded []byte."""
-    return varint.encode(num)
+    """Convert an integer to a varint-encoded byte."""
+    return binascii.hexlify(varint.encode(num))
 
 
 def varint_to_code(buf):
-    return varint.decode_bytes(buf)
+    return varint.decode_bytes(binascii.unhexlify(buf))
+
+
+def _uvarint(buf):
+    """Reads a varint from a bytes buffer and returns the value and # bytes"""
+    x = 0
+    s = 0
+    for i, b_str in enumerate(buf):
+        if six.PY3:
+            b = b_str
+        else:
+            b = int(binascii.b2a_hex(b_str), 16)
+        if b < 0x80:
+            if i > 9 | i == 9 and b > 1:
+                raise ValueError("Overflow")
+            return (x | b << s, i + 1)
+        x |= (b & 0x7f) << s
+        s += 7
+    return 0, 0
+
+
+def read_varint_code(buf):
+    num, n = _uvarint(buf)
+    if num < 0:
+        raise ValueError()
+    return int(num), n
 
 
 # Protocols is the list of multiaddr protocols supported by this module.
@@ -99,8 +134,6 @@ PROTOCOLS = [
     Protocol(P_HTTPS, 0, "https", code_to_varint(P_HTTPS)),
     Protocol(P_IPFS, LENGTH_PREFIXED_VAR_SIZE, "ipfs", code_to_varint(P_IPFS)),
 ]
-
-NULL_PROTOCOL = Protocol(0, 0, "", b'')
 
 _names_to_protocols = dict((proto.name, proto) for proto in PROTOCOLS)
 _codes_to_protocols = dict((proto.code, proto) for proto in PROTOCOLS)
@@ -122,13 +155,13 @@ def add_protocol(proto):
 
 def protocol_with_name(name):
     if name not in _names_to_protocols:
-        return NULL_PROTOCOL
+        raise ValueError("No protocol with name %s" % name)
     return _names_to_protocols[name]
 
 
 def protocol_with_code(code):
     if code not in _codes_to_protocols:
-        return NULL_PROTOCOL
+        raise ValueError("No protocol with code %s" % code)
     return _codes_to_protocols[code]
 
 
@@ -144,8 +177,9 @@ def protocols_with_string(string):
 
     ret = []
     for name in sp:
-        proto = protocol_with_name(name)
-        if proto is NULL_PROTOCOL:
+        try:
+            proto = protocol_with_name(name)
+        except ValueError:
             raise ValueError("No Protocol with name %s" % name)
         ret.append(proto)
     return ret

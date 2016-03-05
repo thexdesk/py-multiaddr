@@ -70,6 +70,8 @@ setup(
     install_requires=[
         'varint',
         'six',
+        'base58',
+        'netaddr',
     ],
     test_suite='tests',
     tests_require=[

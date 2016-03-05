@@ -4,15 +4,15 @@ import pytest
 
 def test_code_to_varint():
     vi = protocols.code_to_varint(5)
-    assert vi == b'\x05'
+    assert vi == b'05'
     vi = protocols.code_to_varint(150)
-    assert vi == b'\x96\x01'
+    assert vi == b'9601'
 
 
 def test_varint_to_code():
-    cc = protocols.varint_to_code(b'\x05')
+    cc = protocols.varint_to_code(b'05')
     assert cc == 5
-    cc = protocols.varint_to_code(b'\x96\x01')
+    cc = protocols.varint_to_code(b'9601')
     assert cc == 150
 
 
@@ -63,8 +63,8 @@ def test_protocol_with_name():
     assert proto.name == 'ip4'
     assert proto.code == protocols.P_IP4
 
-    proto = protocols.protocol_with_name('foo')
-    assert proto is protocols.NULL_PROTOCOL
+    with pytest.raises(ValueError):
+        proto = protocols.protocol_with_name('foo')
 
 
 def test_protocol_with_code():
@@ -72,8 +72,8 @@ def test_protocol_with_code():
     assert proto.name == 'ip4'
     assert proto.code == protocols.P_IP4
 
-    proto = protocols.protocol_with_code(1234)
-    assert proto is protocols.NULL_PROTOCOL
+    with pytest.raises(ValueError):
+        proto = protocols.protocol_with_code(1234)
 
 
 @pytest.mark.parametrize("names", [['ip4'],
