@@ -20,6 +20,8 @@ from .protocols import read_varint_code
 
 
 def string_to_bytes(string):
+    if not string:
+        return b''
     # consume trailing slashes
     if not string.startswith('/'):
         raise ValueError("invalid multiaddr, must begin with /")

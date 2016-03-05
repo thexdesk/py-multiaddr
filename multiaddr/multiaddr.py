@@ -37,13 +37,13 @@ class Multiaddr(object):
 
         Only one of string_addr or bytes_addr may be set
         """
-        if string_addr and bytes_addr:
+        if string_addr is not None and bytes_addr is not None:
             raise ValueError(
                 "Only one of 'string_addr' or 'bytes_addr' may be set")
 
-        if string_addr:
+        if string_addr is not None:
             self._bytes = string_to_bytes(string_addr)
-        elif bytes_addr:
+        elif bytes_addr is not None:
             self._bytes = bytes_addr
         else:
             raise ValueError("Invalid address type, must be bytes or str")
