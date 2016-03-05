@@ -77,11 +77,11 @@ class Protocol(object):
 
 def code_to_varint(num):
     """Convert an integer to a varint-encoded byte."""
-    return varint.encode(num)
+    return binascii.hexlify(varint.encode(num))
 
 
 def varint_to_code(buf):
-    return varint.decode_bytes(buf)
+    return varint.decode_bytes(binascii.unhexlify(buf))
 
 
 def _uvarint(buf):
