@@ -46,14 +46,15 @@ def string_to_bytes(string):
 
 def bytes_to_string(buf):
     st = ['']  # start with empty string so we get a leading slash on join()
+    buf = binascii.unhexlify(buf)
     while buf:
         code, num_bytes_read = read_varint_code(buf)
         buf = buf[num_bytes_read:]
         proto = protocol_with_code(code)
         st.append(proto.name)
-        size = size_for_addr(proto, buf) * 2
+        size = size_for_addr(proto, buf)
         if size > 0:
-            addr = address_bytes_to_string(proto, buf[:size])
+            addr = address_bytes_to_string(proto, binascii.hexlify(buf[:size]))
             st.append(addr)
         buf = buf[size:]
     return '/'.join(st)
@@ -144,7 +145,8 @@ def address_bytes_to_string(proto, buf):
     if proto.code in [P_IP4, P_IP6]:
         return str(IPAddress(int(buf, 16)))
     elif proto.code in [P_TCP, P_UDP, P_DCCP, P_SCTP]:
-        return struct.unpack('>I', binascii.unhexlify(buf))
+        return str(struct.unpack(
+            '>I', b''.join([b'\x00\x00', binascii.unhexlify(buf)]))[0])
     elif proto.code == P_IPFS:
         size, num_bytes_read = read_varint_code(buf)
         buf = buf[num_bytes_read:]
