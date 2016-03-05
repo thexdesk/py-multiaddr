@@ -34,14 +34,6 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 
-requirements = [
-    # TODO: put package requirements here
-]
-
-test_requirements = [
-    # TODO: put package test requirements here
-]
-
 version = load_version()
 
 setup(
@@ -59,7 +51,6 @@ setup(
     ],
     package_dir={'multiaddr': 'multiaddr'},
     include_package_data=True,
-    install_requires=requirements,
     license='MIT License',
     zip_safe=False,
     keywords='multiaddr',
@@ -76,6 +67,11 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
+    install_requires=[
+        # TODO: put package requirements here
+    ],
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=[
+        # TODO: put package test requirements here
+    ],
 )
