@@ -172,10 +172,11 @@ def size_for_addr(proto, buf):
 
 def bytes_split(buf):
     ret = []
+    buf = binascii.unhexlify(buf)
     while buf:
         code, num_bytes_read = read_varint_code(buf)
         proto = protocol_with_code(code)
-        size = size_for_addr(proto, buf[num_bytes_read:]) * 2
+        size = size_for_addr(proto, buf[num_bytes_read:])
         length = size + num_bytes_read
         ret.append(buf[:length])
         buf = buf[length:]
