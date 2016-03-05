@@ -68,7 +68,7 @@ class Multiaddr(object):
 
     def protocols(self):
         """Returns a list of Protocols this Multiaddr includes."""
-        bb = bytes(self)
+        bb = self.to_bytes()
         protos = []
         while bb:
             code, num_bytes_read = read_varint_code(bb)
@@ -85,8 +85,8 @@ class Multiaddr(object):
         For example:
             /ip4/1.2.3.4 encapsulate /tcp/80 = /ip4/1.2.3.4/tcp/80
         """
-        mb = bytes(self)
-        ob = bytes(other)
+        mb = self.to_bytes()
+        ob = other.to_bytes()
         return Multiaddr(bytes_addr=b''.join([mb, ob]))
 
     def decapsulate(self, other):
