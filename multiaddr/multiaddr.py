@@ -52,6 +52,9 @@ class Multiaddr(object):
         """Checks if two Multiaddr objects are exactly equal."""
         return self._bytes == other._bytes
 
+    def __ne__(self, other):
+        return not (self == other)
+
     def __str__(self):
         """Return the string representation of this Multiaddr.
 

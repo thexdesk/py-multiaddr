@@ -74,6 +74,9 @@ class Protocol(object):
                    self.name == other.name,
                    self.vcode == other.vcode)
 
+    def __ne__(self, other):
+        return not (self == other)
+
     def __repr__(self):
         return "Protocol(code={code}, name='{name}', size={size})".format(
                 code=self.code,
