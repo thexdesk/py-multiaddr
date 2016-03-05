@@ -74,6 +74,12 @@ class Protocol(object):
                    self.name == other.name,
                    self.vcode == other.vcode)
 
+    def __repr__(self):
+        return "Protocol(code={code}, name='{name}', size={size})".format(
+                code=self.code,
+                size=self.size,
+                name=self.name)
+
 
 def code_to_varint(num):
     """Convert an integer to a varint-encoded byte."""

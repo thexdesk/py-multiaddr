@@ -63,6 +63,9 @@ class Multiaddr(object):
             raise ValueError(
                 "multiaddr failed to convert back to string. corrupted?")
 
+    def __repr__(self):
+        return "<Multiaddr %s>" % str(self)
+
     def to_bytes(self):
         """Returns the byte array representation of this Multiaddr."""
         return self._bytes
