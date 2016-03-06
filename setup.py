@@ -67,6 +67,9 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
+    setup_requires=[
+        'pytest-runner',
+    ],
     install_requires=[
         'varint',
         'six',
