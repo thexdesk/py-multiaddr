@@ -74,6 +74,9 @@ docs:
 servedocs: docs
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
+readme.html: README.rst
+	$(WITH_VENV) rst2html.py README.rst > readme.html
+
 release: clean
 	python setup.py sdist upload
 	python setup.py bdist_wheel upload
