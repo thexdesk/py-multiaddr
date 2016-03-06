@@ -49,7 +49,7 @@ setup:
 	pip install -r requirements_dev.txt
 
 lint:
-	flake8 multiaddr tests
+	flake8 multiaddr/* tests/*
 
 test:
 	TOXENV=py27 tox
