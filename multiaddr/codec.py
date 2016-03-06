@@ -109,7 +109,8 @@ def address_string_to_bytes(proto, addr_string):
                 "failed to parse %s addr: %s not a Tor onion address."
                 % (proto.name, addr_string))
         try:
-            onion_host_bytes = base64.b32decode(addr[0].upper())
+            onion_host_bytes = binascii.hexlify(
+                base64.b32decode(addr[0].upper()))
         except Exception as ex:
             raise ValueError(
                 "failed to decode base32 %s addr: %s %s"
@@ -128,7 +129,8 @@ def address_string_to_bytes(proto, addr_string):
             raise ValueError("failed to parse %s addr: %s"
                              % (proto.name, "port less than 1"))
 
-        return b''.join([onion_host_bytes, bytes(port)])
+        return b''.join([onion_host_bytes,
+                         binascii.hexlify(encode_big_endian_16(port))])
     elif proto.code == P_IPFS:  # ipfs
         # the address is a varint prefixed multihash string representation
         try:
