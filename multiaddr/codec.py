@@ -150,8 +150,10 @@ def address_string_to_bytes(proto, addr_string):
 
 def address_bytes_to_string(proto, buf):
     from .util import decode_big_endian_16
-    if proto.code in [P_IP4, P_IP6]:
-        return str(IPAddress(int(buf, 16)))
+    if proto.code == P_IP4:
+        return str(IPAddress(int(buf, 16), 4).ipv4())
+    elif proto.code == P_IP6:
+        return str(IPAddress(int(buf, 16), 6).ipv6())
     elif proto.code in [P_TCP, P_UDP, P_DCCP, P_SCTP]:
         return str(decode_big_endian_16(binascii.unhexlify(buf)))
     elif proto.code == P_ONION:
