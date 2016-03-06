@@ -2,7 +2,6 @@ import base58
 import base64
 import binascii
 import six
-import struct
 
 from netaddr import IPAddress
 
@@ -68,6 +67,7 @@ def bytes_to_string(buf):
 
 def address_string_to_bytes(proto, addr_string):
     from .util import int_to_hex
+    from .util import encode_big_endian_16
     if proto.code == P_IP4:  # ipv4
         try:
             ip = IPAddress(addr_string)
@@ -95,7 +95,7 @@ def address_string_to_bytes(proto, addr_string):
         if ip >= 65536:
             raise ValueError("failed to parse %s addr: %s" %
                              (proto.name, "greater than 65536"))
-        return binascii.hexlify(struct.pack('>I', ip)[-2:])
+        return binascii.hexlify(encode_big_endian_16(ip))
     elif proto.code == P_ONION:
         addr = addr_string.split(":")
         if len(addr) != 2:
@@ -109,7 +109,8 @@ def address_string_to_bytes(proto, addr_string):
                 "failed to parse %s addr: %s not a Tor onion address."
                 % (proto.name, addr_string))
         try:
-            onion_host_bytes = base64.b32decode(addr[0].upper())
+            onion_host_bytes = binascii.hexlify(
+                base64.b32decode(addr[0].upper()))
         except Exception as ex:
             raise ValueError(
                 "failed to decode base32 %s addr: %s %s"
@@ -128,7 +129,8 @@ def address_string_to_bytes(proto, addr_string):
             raise ValueError("failed to parse %s addr: %s"
                              % (proto.name, "port less than 1"))
 
-        return b''.join([onion_host_bytes, bytes(port)])
+        return b''.join([onion_host_bytes,
+                         binascii.hexlify(encode_big_endian_16(port))])
     elif proto.code == P_IPFS:  # ipfs
         # the address is a varint prefixed multihash string representation
         try:
@@ -147,12 +149,17 @@ def address_string_to_bytes(proto, addr_string):
 
 
 def address_bytes_to_string(proto, buf):
+    from .util import decode_big_endian_16
     if proto.code in [P_IP4, P_IP6]:
         return str(IPAddress(int(buf, 16)))
     elif proto.code in [P_TCP, P_UDP, P_DCCP, P_SCTP]:
-        buf = buf.zfill(size_for_addr(proto, buf) * 4)
+        return str(decode_big_endian_16(binascii.unhexlify(buf)))
+    elif proto.code == P_ONION:
         buf = binascii.unhexlify(buf)
-        return str(struct.unpack('>I', buf)[0])
+        addr_bytes, port_bytes = (buf[:-2], buf[-2:])
+        addr = base64.b32encode(addr_bytes).decode('ascii').lower()
+        port = str(decode_big_endian_16(port_bytes))
+        return ':'.join([addr, port])
     elif proto.code == P_IPFS:
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)

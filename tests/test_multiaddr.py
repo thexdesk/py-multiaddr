@@ -79,7 +79,8 @@ def test_invalid(addr_str):
      "/ip4/127.0.0.1/ipfs/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC",
      "/ip4/127.0.0.1/ipfs/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234"])  # nopep8
 def test_valid(addr_str):
-    Multiaddr(addr_str)
+    ma = Multiaddr(addr_str)
+    assert str(ma) == addr_str.rstrip("/")
 
 
 def test_eq():

@@ -127,7 +127,9 @@ PROTOCOLS = [
     Protocol(P_IP6, 128, "ip6", code_to_varint(P_IP6)),
     # these require varint:
     Protocol(P_SCTP, 16, "sctp", code_to_varint(P_SCTP)),
-    Protocol(P_ONION, 80, "onion", code_to_varint(P_ONION)),
+    # Bug in spec? Onion addresses actually need to be 96 bits to account for
+    # the port number.
+    Protocol(P_ONION, 96, "onion", code_to_varint(P_ONION)),
     Protocol(P_UTP, 0, "utp", code_to_varint(P_UTP)),
     Protocol(P_UDT, 0, "udt", code_to_varint(P_UDT)),
     Protocol(P_HTTP, 0, "http", code_to_varint(P_HTTP)),
