@@ -55,5 +55,8 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+# File just for checking my RST syntax
+readme.html
+
 # PyBuilder
 target/
