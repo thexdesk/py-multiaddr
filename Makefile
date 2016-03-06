@@ -77,14 +77,9 @@ servedocs: docs
 readme.html: README.rst
 	$(WITH_VENV) rst2html.py README.rst > readme.html
 
-release: clean
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
-
 dist: clean
 	python setup.py sdist
 	python setup.py bdist_wheel
-	ls -l dist
 
 install: clean
 	python setup.py install
