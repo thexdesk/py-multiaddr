@@ -2,7 +2,6 @@ import base58
 import base64
 import binascii
 import six
-import struct
 
 from netaddr import IPAddress
 
@@ -68,6 +67,7 @@ def bytes_to_string(buf):
 
 def address_string_to_bytes(proto, addr_string):
     from .util import int_to_hex
+    from .util import encode_big_endian_16
     if proto.code == P_IP4:  # ipv4
         try:
             ip = IPAddress(addr_string)
@@ -95,7 +95,7 @@ def address_string_to_bytes(proto, addr_string):
         if ip >= 65536:
             raise ValueError("failed to parse %s addr: %s" %
                              (proto.name, "greater than 65536"))
-        return binascii.hexlify(struct.pack('>I', ip)[-2:])
+        return binascii.hexlify(encode_big_endian_16(ip))
     elif proto.code == P_ONION:
         addr = addr_string.split(":")
         if len(addr) != 2:
@@ -147,12 +147,11 @@ def address_string_to_bytes(proto, addr_string):
 
 
 def address_bytes_to_string(proto, buf):
+    from .util import decode_big_endian_16
     if proto.code in [P_IP4, P_IP6]:
         return str(IPAddress(int(buf, 16)))
     elif proto.code in [P_TCP, P_UDP, P_DCCP, P_SCTP]:
-        buf = buf.zfill(size_for_addr(proto, buf) * 4)
-        buf = binascii.unhexlify(buf)
-        return str(struct.unpack('>I', buf)[0])
+        return str(decode_big_endian_16(binascii.unhexlify(buf)))
     elif proto.code == P_IPFS:
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
