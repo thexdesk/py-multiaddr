@@ -157,7 +157,7 @@ def address_bytes_to_string(proto, buf):
     elif proto.code == P_ONION:
         buf = binascii.unhexlify(buf)
         addr_bytes, port_bytes = (buf[:-2], buf[-2:])
-        addr = base64.b32encode(addr_bytes).lower()
+        addr = base64.b32encode(addr_bytes).decode('ascii').lower()
         port = str(decode_big_endian_16(port_bytes))
         return ':'.join([addr, port])
     elif proto.code == P_IPFS:
