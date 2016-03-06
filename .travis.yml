@@ -1,23 +1,19 @@
-# Config file for automatic testing at travis-ci.org
-# This file will be regenerated if you run travis_pypi_setup.py
-
 sudo: false
 language: python
-
 matrix:
   include:
-    - python: 2.6
-      env: TOXENV=py26
-    - python: 2.7
-      env: TOXENV=py27
-    - python: 3.3
-      env: TOXENV=py33
-    - python: 3.4
-      env: TOXENV=py34
-    - python: 3.5
-      env: TOXENV=py35
-    - python: pypy
-      env: TOXENV=pypy
+  - python: 2.6
+    env: TOXENV=py26
+  - python: 2.7
+    env: TOXENV=py27
+  - python: 3.3
+    env: TOXENV=py33
+  - python: 3.4
+    env: TOXENV=py34
+  - python: 3.5
+    env: TOXENV=py35
+  - python: pypy
+    env: TOXENV=pypy
 install:
 - pip install tox
 - pip install python-coveralls
@@ -27,8 +23,6 @@ script:
 - tox
 after_success:
 - codecov
-# After you create the Github repo and add it to Travis, run the
-# travis_pypi_setup.py script to finish PyPI deployment setup
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
@@ -39,4 +33,4 @@ deploy:
     tags: true
     repo: sbuss/multiaddr
     branch: master
-    condition: $TOXENV == py27
+    condition: "$TOXENV == py27"
