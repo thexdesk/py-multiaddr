@@ -77,6 +77,10 @@ servedocs: docs
 readme.html: README.rst
 	$(WITH_VENV) rst2html.py README.rst > readme.html
 
+.PHONY: authors
+authors:
+	git shortlog --numbered --summary --email | cut -f 2 > AUTHORS
+
 dist: clean
 	python setup.py sdist
 	python setup.py bdist_wheel
