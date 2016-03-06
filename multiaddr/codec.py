@@ -152,6 +152,16 @@ def address_bytes_to_string(proto, buf):
         return str(IPAddress(int(buf, 16)))
     elif proto.code in [P_TCP, P_UDP, P_DCCP, P_SCTP]:
         return str(decode_big_endian_16(binascii.unhexlify(buf)))
+    elif proto.code == P_ONION:
+        buf = binascii.unhexlify(buf)
+        size, num_bytes_read = read_varint_code(buf)
+        buf = buf[num_bytes_read:]
+        addr_bytes = buf[size:]
+        port_bytes = buf[size+1:size+2]
+        buf = buf[size+2:]
+        addr = base64.b32encode(addr_bytes)
+        port = str(decode_big_endian_16(port_bytes))
+        return ':'.join([addr, port])
     elif proto.code == P_IPFS:
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
