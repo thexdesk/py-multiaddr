@@ -1,7 +1,1 @@
-=====
-Usage
-=====
-
-To use Multiaddr in a project::
-
-    import multiaddr
+.. include:: ../USAGE.rst
