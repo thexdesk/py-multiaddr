@@ -4,11 +4,6 @@
 Installation
 ============
 
-At the command line::
+Just install from pypi
 
-    $ easy_install multiaddr
-
-Or, if you have virtualenvwrapper installed::
-
-    $ mkvirtualenv multiaddr
     $ pip install multiaddr
