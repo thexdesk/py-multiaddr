@@ -38,16 +38,12 @@ class Multiaddr(object):
 
         Only one of string_addr or bytes_addr may be set
         """
-        if string_addr is not None and bytes_addr is not None:
-            raise ValueError(
-                "Only one of 'string_addr' or 'bytes_addr' may be set")
-
-        if string_addr is not None:
+        if string_addr is not None and bytes_addr is None:
             self._bytes = string_to_bytes(string_addr)
-        elif bytes_addr is not None:
+        elif bytes_addr is not None and string_addr is None:
             self._bytes = bytes_addr
         else:
-            raise ValueError("Invalid address type, must be bytes or str")
+            raise ValueError("Invalid address type, must be bytes xor str")
 
     def __eq__(self, other):
         """Checks if two Multiaddr objects are exactly equal."""
