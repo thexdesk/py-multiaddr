@@ -101,8 +101,9 @@ class Multiaddr(object):
         """
         s1 = str(self)
         s2 = str(other)
-        idx = s1.rindex(s2)
-        if idx < 0:
+        try:
+            idx = s1.rindex(s2)
+        except ValueError:
             # if multiaddr not contained, returns a copy
             return copy(self)
         try:
