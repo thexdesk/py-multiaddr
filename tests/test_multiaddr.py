@@ -190,7 +190,6 @@ def test_encapsulate():
 
     m5 = Multiaddr("/ip6/::1")
     decapsulated_3 = decapsulated.decapsulate(m5)
-    print decapsulated_3
 
     assert str(decapsulated_3) == "/ip4/127.0.0.1/udp/1234"
 
