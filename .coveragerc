@@ -1,10 +1,5 @@
 [run]
 branch = True
 source = multiaddr
-
-[report]
-omit =
-    */_version.py
-    */__init__.py
-    tests/*
-    setup.py
+include =
+    multiaddr/*
