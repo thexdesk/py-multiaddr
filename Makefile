@@ -88,6 +88,9 @@ dist: clean
 install: clean
 	python setup.py install
 
+bump:
+	bumpversion --tag-name "{new_version}" patch
+
 deploy-prep: clean authors readme.html docs dist
 	@echo "Did you remember to bump the version?"
 	@echo "If not, run 'bumpversion {patch, minor, major}' and run this target again"
