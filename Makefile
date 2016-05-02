@@ -87,3 +87,5 @@ dist: clean
 
 install: clean
 	python setup.py install
+
+deploy-prep: clean authors readme.html docs dist
