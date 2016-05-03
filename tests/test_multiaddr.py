@@ -236,6 +236,13 @@ def test_bad_initialization_too_many_params():
 
 
 def test_get_value_too_many_fields_protocol(monkeypatch):
+    """
+    This test patches the Multiaddr's string representation to return
+    an invalid string in order to test that value_for_protocol properly
+    throws a ValueError.  This avoids some of the error checking in
+    the constructor and is easier to patch, thus the actual values
+    that the constructor specifies is ignored by the test.
+    """
     monkeypatch.setattr("multiaddr.multiaddr.Multiaddr.__str__",
                         lambda ignore: '/udp/1234/5678')
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
@@ -243,7 +250,7 @@ def test_get_value_too_many_fields_protocol(monkeypatch):
         a.value_for_protocol(P_UDP)
 
 
-def test_multi_addr_str_corruption(monkeypatch):
+def test_multi_addr_str_corruption():
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
     a._bytes = b"047047047"
 
@@ -251,7 +258,7 @@ def test_multi_addr_str_corruption(monkeypatch):
         str(a)
 
 
-def test_decapsulate_incorrect_byte_boundaries(monkeypatch):
+def test_decapsulate_corrupted_bytes(monkeypatch):
     def raiseException(self, other):
         raise Exception
 
