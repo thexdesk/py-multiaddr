@@ -14,7 +14,8 @@ class ProtocolNotFoundException(Exception):
 
 
 class Multiaddr(object):
-    """Multiaddr is a representation of multiple nested
+    """Multiaddr is a representation of multiple nested internet addresses.
+
     Multiaddr is a cross-protocol, cross-platform format for representing
     internet addresses. It emphasizes explicitness and self-description.
 
