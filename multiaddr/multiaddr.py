@@ -43,7 +43,7 @@ class Multiaddr(object):
         elif bytes_addr is not None and string_addr is None:
             self._bytes = bytes_addr
         else:
-            raise ValueError("Invalid address type, must be bytes xor str")
+            raise ValueError("Invalid address type, must be bytes or str")
 
     def __eq__(self, other):
         """Checks if two Multiaddr objects are exactly equal."""
