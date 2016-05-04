@@ -188,6 +188,11 @@ def test_encapsulate():
     decapsulated_2 = decapsulated.decapsulate(m4)
     assert str(decapsulated_2) == ""
 
+    m5 = Multiaddr("/ip6/::1")
+    decapsulated_3 = decapsulated.decapsulate(m5)
+
+    assert str(decapsulated_3) == "/ip4/127.0.0.1/udp/1234"
+
 
 def assert_value_for_proto(multi, proto, expected):
     assert multi.value_for_protocol(proto) == expected
@@ -218,3 +223,54 @@ def test_get_value():
     assert_value_for_proto(a, P_IP4, "0.0.0.0")
     assert_value_for_proto(a, P_UDP, "12345")
     assert_value_for_proto(a, P_UTP, "")
+
+
+def test_bad_initialization_no_params():
+    with pytest.raises(ValueError):
+        Multiaddr()
+
+
+def test_bad_initialization_too_many_params():
+    with pytest.raises(ValueError):
+        Multiaddr("/ip4/0.0.0.0", string_to_bytes("/ip4/0.0.0.0"))
+
+
+def test_get_value_too_many_fields_protocol(monkeypatch):
+    """
+    This test patches the Multiaddr's string representation to return
+    an invalid string in order to test that value_for_protocol properly
+    throws a ValueError.  This avoids some of the error checking in
+    the constructor and is easier to patch, thus the actual values
+    that the constructor specifies is ignored by the test.
+    """
+    monkeypatch.setattr("multiaddr.multiaddr.Multiaddr.__str__",
+                        lambda ignore: '/udp/1234/5678')
+    a = Multiaddr("/ip4/127.0.0.1/udp/1234")
+    with pytest.raises(ValueError):
+        a.value_for_protocol(P_UDP)
+
+
+def test_multi_addr_str_corruption():
+    a = Multiaddr("/ip4/127.0.0.1/udp/1234")
+    a._bytes = b"047047047"
+
+    with pytest.raises(ValueError):
+        str(a)
+
+
+def test_decapsulate_corrupted_bytes(monkeypatch):
+    def raiseException(self, other):
+        raise Exception
+
+    a = Multiaddr("/ip4/127.0.0.1/udp/1234")
+    u = Multiaddr("/udp/1234")
+    monkeypatch.setattr("multiaddr.multiaddr.Multiaddr.__init__",
+                        raiseException)
+
+    with pytest.raises(ValueError):
+        a.decapsulate(u)
+
+
+def test__repr():
+    a = Multiaddr("/ip4/127.0.0.1/udp/1234")
+    assert(repr(a) == "<Multiaddr %s>" % str(a))

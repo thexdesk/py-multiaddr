@@ -38,13 +38,9 @@ class Multiaddr(object):
 
         Only one of string_addr or bytes_addr may be set
         """
-        if string_addr is not None and bytes_addr is not None:
-            raise ValueError(
-                "Only one of 'string_addr' or 'bytes_addr' may be set")
-
-        if string_addr is not None:
+        if string_addr is not None and bytes_addr is None:
             self._bytes = string_to_bytes(string_addr)
-        elif bytes_addr is not None:
+        elif bytes_addr is not None and string_addr is None:
             self._bytes = bytes_addr
         else:
             raise ValueError("Invalid address type, must be bytes or str")
@@ -105,8 +101,9 @@ class Multiaddr(object):
         """
         s1 = str(self)
         s2 = str(other)
-        idx = s1.rindex(s2)
-        if idx < 0:
+        try:
+            idx = s1.rindex(s2)
+        except ValueError:
             # if multiaddr not contained, returns a copy
             return copy(self)
         try:
