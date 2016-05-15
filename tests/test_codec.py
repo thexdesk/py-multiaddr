@@ -1,7 +1,19 @@
 import pytest
 
+from multiaddr.codec import size_for_addr
 from multiaddr.codec import string_to_bytes
 from multiaddr.codec import bytes_to_string
+
+from multiaddr.protocols import _names_to_protocols
+
+
+@pytest.mark.parametrize("proto, buf, expected", [
+    (_names_to_protocols['https'], b'\x01\x02\x03', 0),
+    (_names_to_protocols['ip4'], b'\x01\x02\x03', 4),
+    (_names_to_protocols['ipfs'], b'\x40\x50\x60\x51', 65),
+        ])
+def test_size_for_addr(proto, buf, expected):
+    assert size_for_addr(proto, buf) == expected
 
 
 def test_string_to_bytes():
