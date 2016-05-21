@@ -215,7 +215,7 @@ def test_bad_initialization_no_params():
 
 def test_bad_initialization_too_many_params():
     with pytest.raises(ValueError):
-        Multiaddr("/ip4/0.0.0.0", string_to_bytes("/ip4/0.0.0.0"))
+        Multiaddr("/ip4/0.0.0.0", "")
 
 
 def test_get_value_too_many_fields_protocol(monkeypatch):
