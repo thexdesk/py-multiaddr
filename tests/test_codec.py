@@ -61,3 +61,15 @@ def test_bytes_to_string():
     assert bytes_to_string(b"047f0000010610e1") == "/ip4/127.0.0.1/tcp/4321"
     assert (bytes_to_string(b"047f0000011104d2047f0000010610e1") ==
             "/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321")
+
+
+def string_to_bytes_value_error():
+    pass
+
+
+def address_string_to_bytes_value_error():
+    pass
+
+
+def address_bytes_to_string_value_error():
+    pass
