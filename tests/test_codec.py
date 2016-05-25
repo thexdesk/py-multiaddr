@@ -39,8 +39,8 @@ def test_address_bytes_to_string(proto, buf, expected):
 
 
 @pytest.mark.parametrize("proto, expected, string", [
-        (_names_to_protocols['ip4'], b'0a0b0c0d', '10.11.12.13'),
-        (_names_to_protocols['ip6'], b'1aa12bb23cc34dd45ee56ff67ab78ac8', '1aa1:2bb2:3cc3:4dd4:5ee5:6ff6:7ab7:8ac8'),
+        (_names_to_protocols['ip4'], '0a0b0c0d', '10.11.12.13'),
+        (_names_to_protocols['ip6'], '1aa12bb23cc34dd45ee56ff67ab78ac8', '1aa1:2bb2:3cc3:4dd4:5ee5:6ff6:7ab7:8ac8'),
         (_names_to_protocols['tcp'], b'abcd', '43981'),
         (_names_to_protocols['onion'], b'9a18087306369043091f04d2', 'timaq4ygg2iegci7:1234'),
         (_names_to_protocols['ipfs'], b'221220d52ebb89d85b02a284948203a62ff28389c57c9f42beec4ec20db76a68911c0b', 'QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC'),
