@@ -21,7 +21,7 @@ def test_size_for_addr(proto, buf, expected):
 
 
 @pytest.mark.parametrize("buf, expected", [
-    (b'047f0000011104d2047f0000010610e1', ['\x04\x7f\x00\x00\x01', '\x11\x04\xd2', '\x04\x7f\x00\x00\x01', '\x06\x10\xe1']),  # "/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321"
+    (b'047f0000011104d2047f0000010610e1', [b'\x04\x7f\x00\x00\x01', b'\x11\x04\xd2', b'\x04\x7f\x00\x00\x01', b'\x06\x10\xe1']),  # "/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321"
         ])
 def test_bytes_split(buf, expected):
     assert (bytes_split(buf) == expected)
