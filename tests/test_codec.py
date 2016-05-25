@@ -8,6 +8,7 @@ from multiaddr.codec import address_bytes_to_string
 from multiaddr.codec import address_string_to_bytes
 
 from multiaddr.protocols import _names_to_protocols
+from multiaddr.protocols import Protocol
 
 
 @pytest.mark.parametrize("proto, buf, expected", [
@@ -63,13 +64,45 @@ def test_bytes_to_string():
             "/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321")
 
 
-def string_to_bytes_value_error():
-    pass
+@pytest.mark.parametrize("string", [
+        'test',
+        '/ip4/'
+    ])
+def test_string_to_bytes_value_error(string):
+    with pytest.raises(ValueError):
+        string_to_bytes(string)
 
 
-def address_string_to_bytes_value_error():
-    pass
+class DummyProtocol(Protocol):
+    def __init__(self, code, size, name, vcode):
+        self.code = code
+        self.size = size
+        self.name = name
+        self.vcode = vcode
 
 
-def address_bytes_to_string_value_error():
-    pass
+@pytest.mark.parametrize("proto, address", [
+        (DummyProtocol(234, 32, 'test', b'123'), '1.2.3.4'),
+        (_names_to_protocols['ip4'], '1124.2.3'),
+        (_names_to_protocols['ip6'], '123:31224444'),
+        (_names_to_protocols['tcp'], 'a'),
+        (_names_to_protocols['tcp'], '100000'),
+        (_names_to_protocols['onion'], '100000'),
+        (_names_to_protocols['onion'], '1234567890123456:0'),
+        (_names_to_protocols['onion'], 'timaq4ygg2iegci7:a'),
+        (_names_to_protocols['onion'], 'timaq4ygg2iegci7:0'),
+        (_names_to_protocols['onion'], 'timaq4ygg2iegci7:71234'),
+        (_names_to_protocols['ipfs'], '15230d52ebb89d85b02a284948203a'),
+        ])
+def test_address_string_to_bytes_value_error(proto, address):
+    with pytest.raises(ValueError):
+        address_string_to_bytes(proto, address)
+
+
+@pytest.mark.parametrize("proto, buf", [
+        (DummyProtocol(234, 32, 'test', b'123'), b'0a0b0c0d'),
+        (_names_to_protocols['ipfs'], b'15230d52ebb89d85b02a284948203a')
+        ])
+def test_address_bytes_to_string_value_error(proto, buf):
+    with pytest.raises(ValueError):
+        address_bytes_to_string(proto, buf)
