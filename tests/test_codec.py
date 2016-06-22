@@ -10,6 +10,27 @@ from multiaddr.codec import string_to_bytes
 from multiaddr.protocols import _names_to_protocols
 from multiaddr.protocols import Protocol
 
+# This test data was pulled from other unit tests and
+# adjustments made as necessary.
+ADDR_BYTES_MAP_STR_TEST_DATA = [
+    (_names_to_protocols['ip4'], b'0a0b0c0d', '10.11.12.13'),
+    (_names_to_protocols['ip6'], b'1aa12bb23cc34dd45ee56ff67ab78ac8',
+     '1aa1:2bb2:3cc3:4dd4:5ee5:6ff6:7ab7:8ac8'),
+    (_names_to_protocols['tcp'], b'abcd', '43981'),
+    (_names_to_protocols['onion'], b'9a18087306369043091f04d2',
+     'timaq4ygg2iegci7:1234'),
+    (_names_to_protocols['ipfs'],
+     b'221220d52ebb89d85b02a284948203a62ff28389c57c9f42beec4ec20db76a68911c0b',
+     'QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC'),
+]
+
+BYTES_MAP_STR_TEST_DATA = [
+    ("/ip4/127.0.0.1/udp/1234", b'047f0000011104d2'),
+    ("/ip4/127.0.0.1/tcp/4321", b'047f0000010610e1'),
+    ("/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321",
+     b'047f0000011104d2047f0000010610e1')
+]
+
 
 @pytest.mark.parametrize("proto, buf, expected", [
     (_names_to_protocols['https'], b'\x01\x02\x03', 0),
@@ -31,18 +52,6 @@ def test_size_for_addr(proto, buf, expected):
 def test_bytes_split(buf, expected):
     assert bytes_split(buf) == expected
 
-ADDR_BYTES_MAP_STR_TEST_DATA = [
-    (_names_to_protocols['ip4'], b'0a0b0c0d', '10.11.12.13'),
-    (_names_to_protocols['ip6'], b'1aa12bb23cc34dd45ee56ff67ab78ac8',
-     '1aa1:2bb2:3cc3:4dd4:5ee5:6ff6:7ab7:8ac8'),
-    (_names_to_protocols['tcp'], b'abcd', '43981'),
-    (_names_to_protocols['onion'], b'9a18087306369043091f04d2',
-     'timaq4ygg2iegci7:1234'),
-    (_names_to_protocols['ipfs'],
-     b'221220d52ebb89d85b02a284948203a62ff28389c57c9f42beec4ec20db76a68911c0b',
-     'QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC'),
-]
-
 
 @pytest.mark.parametrize("proto, buf, expected", ADDR_BYTES_MAP_STR_TEST_DATA)
 def test_address_bytes_to_string(proto, buf, expected):
@@ -53,13 +62,6 @@ def test_address_bytes_to_string(proto, buf, expected):
                          ADDR_BYTES_MAP_STR_TEST_DATA)
 def test_address_string_to_bytes(proto, string, expected):
     assert address_string_to_bytes(proto, string) == expected
-
-BYTES_MAP_STR_TEST_DATA = [
-    ("/ip4/127.0.0.1/udp/1234", b'047f0000011104d2'),
-    ("/ip4/127.0.0.1/tcp/4321", b'047f0000010610e1'),
-    ("/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321",
-     b'047f0000011104d2047f0000010610e1')
-]
 
 
 @pytest.mark.parametrize("string, buf", BYTES_MAP_STR_TEST_DATA)
