@@ -54,20 +54,22 @@ def test_address_bytes_to_string(proto, buf, expected):
 def test_address_string_to_bytes(proto, string, expected):
     assert address_string_to_bytes(proto, string) == expected
 
+BYTES_MAP_STR_TEST_DATA = [
+    ("/ip4/127.0.0.1/udp/1234", b'047f0000011104d2'),
+    ("/ip4/127.0.0.1/tcp/4321", b'047f0000010610e1'),
+    ("/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321",
+     b'047f0000011104d2047f0000010610e1')
+]
 
-def test_string_to_bytes():
-    assert string_to_bytes("/ip4/127.0.0.1/udp/1234") == b'047f0000011104d2'
-    assert string_to_bytes("/ip4/127.0.0.1/tcp/4321") == b'047f0000010610e1'
-    assert (
-        string_to_bytes("/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321") ==
-        b'047f0000011104d2047f0000010610e1')
+
+@pytest.mark.parametrize("string, buf", BYTES_MAP_STR_TEST_DATA)
+def test_string_to_bytes(string, buf):
+    assert string_to_bytes(string) == buf
 
 
-def test_bytes_to_string():
-    assert bytes_to_string(b"047f0000011104d2") == "/ip4/127.0.0.1/udp/1234"
-    assert bytes_to_string(b"047f0000010610e1") == "/ip4/127.0.0.1/tcp/4321"
-    assert (bytes_to_string(b"047f0000011104d2047f0000010610e1") ==
-            "/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321")
+@pytest.mark.parametrize("string, buf", BYTES_MAP_STR_TEST_DATA)
+def test_bytes_to_string(string, buf):
+    assert bytes_to_string(buf) == string
 
 
 @pytest.mark.parametrize("string", [
