@@ -1,4 +1,5 @@
 import binascii
+import six
 import struct
 
 from .codec import bytes_split
@@ -27,7 +28,11 @@ def int_to_hex(i, size):
     Note that size is the size of the resulting hex string. So, for a 32Byte
     int, size should be 64 (two hex characters per byte"."""
     f_str = "{0:0%sx}" % size
-    return f_str.format(i).lower()
+    buf = f_str.format(i).lower()
+    if six.PY3:
+        buf = bytes(buf, 'utf-8')
+
+    return buf
 
 
 def encode_big_endian_32(i):
