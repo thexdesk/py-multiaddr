@@ -38,7 +38,7 @@ def test_invalid_code(valid_params, invalid_code):
         protocols.Protocol(**valid_params)
 
 
-@pytest.mark.parametrize("invalid_size", [-2, 512])
+@pytest.mark.parametrize("invalid_size", [-2, 512, 1.3])
 def test_invalid_size(valid_params, invalid_size):
     valid_params['size'] = invalid_size
     with pytest.raises(ValueError):
@@ -48,6 +48,13 @@ def test_invalid_size(valid_params, invalid_size):
 @pytest.mark.parametrize("invalid_name", [123, 1.0])
 def test_invalid_name(valid_params, invalid_name):
     valid_params['name'] = invalid_name
+    with pytest.raises(ValueError):
+        protocols.Protocol(**valid_params)
+
+
+@pytest.mark.parametrize("invalid_vcode", [3, u'a3'])
+def test_invalid_vcode(valid_params, invalid_vcode):
+    valid_params['vcode'] = invalid_vcode
     with pytest.raises(ValueError):
         protocols.Protocol(**valid_params)
 
@@ -74,6 +81,15 @@ def test_protocol_with_code():
 
     with pytest.raises(ValueError):
         proto = protocols.protocol_with_code(1234)
+
+
+def test_protocol_equality():
+    proto1 = protocols.protocol_with_name('ip4')
+    proto2 = protocols.protocol_with_code(protocols.P_IP4)
+    proto3 = protocols.protocol_with_name('onion')
+
+    assert proto1 == proto2
+    assert proto1 != proto3
 
 
 @pytest.mark.parametrize("names", [['ip4'],
