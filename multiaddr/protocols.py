@@ -69,10 +69,10 @@ class Protocol(object):
         self.vcode = vcode
 
     def __eq__(self, other):
-        return all(self.code == other.code,
+        return all((self.code == other.code,
                    self.size == other.size,
                    self.name == other.name,
-                   self.vcode == other.vcode)
+                   self.vcode == other.vcode))
 
     def __ne__(self, other):
         return not (self == other)
