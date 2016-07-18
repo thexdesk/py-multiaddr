@@ -148,3 +148,8 @@ def test_add_protocol_twice(patch_protocols):
     del protocols._codes_to_protocols[proto.code]
     protocols.add_protocol(proto)
     assert protocols.PROTOCOLS == [proto, proto]
+
+
+def test_protocol_repr():
+    proto = protocols.protocol_with_name('ip4')
+    assert "Protocol(code=4, name='ip4', size=32)" == repr(proto)
