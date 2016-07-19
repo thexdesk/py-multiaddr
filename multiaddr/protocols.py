@@ -103,7 +103,7 @@ def _uvarint(buf):
         else:
             b = int(binascii.b2a_hex(b_str), 16)
         if b < 0x80:
-            if i > 9 | i == 9 and b > 1:
+            if i > 9 or (i == 9 and b > 1):
                 raise ValueError("Overflow")
             return (x | b << s, i + 1)
         x |= (b & 0x7f) << s
