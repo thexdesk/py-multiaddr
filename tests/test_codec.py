@@ -112,7 +112,8 @@ def test_address_string_to_bytes_value_error(proto, address):
 
 @pytest.mark.parametrize("proto, buf", [
     (DummyProtocol(234, 32, 'test', b'123'), b'0a0b0c0d'),
-    (_names_to_protocols['ipfs'], b'15230d52ebb89d85b02a284948203a')
+    (_names_to_protocols['ipfs'], b'15230d52ebb89d85b02a284948203a'),
+    (_names_to_protocols['tcp'], b'ffffffff')
 ])
 def test_address_bytes_to_string_value_error(proto, buf):
     with pytest.raises(ValueError):
