@@ -95,7 +95,7 @@ class DummyProtocol(Protocol):
 @pytest.mark.parametrize("proto, address", [
     (DummyProtocol(234, 32, 'test', b'123'), '1.2.3.4'),
     (_names_to_protocols['ip4'], '1124.2.3'),
-    (_names_to_protocols['ip6'], '123:31224444'),
+    (_names_to_protocols['ip6'], '123.123.123.123'),
     (_names_to_protocols['tcp'], 'a'),
     (_names_to_protocols['tcp'], '100000'),
     (_names_to_protocols['onion'], '100000'),
