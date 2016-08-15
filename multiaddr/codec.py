@@ -40,12 +40,7 @@ def string_to_bytes(string):
         if len(sp) < 1:
             raise ValueError(
                 "protocol requires address, none given: %s" % proto.name)
-        addr_string = sp.pop(0)
-        addr_bytes = address_string_to_bytes(proto, addr_string)
-        if isinstance(addr_bytes, six.string_types):
-            bs.append(six.b(addr_bytes))
-        else:
-            bs.append(addr_bytes)
+        bs.append(address_string_to_bytes(proto, sp.pop(0)))
     return b''.join(bs)
 
 
