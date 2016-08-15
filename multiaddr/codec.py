@@ -45,6 +45,7 @@ def string_to_bytes(string):
         if isinstance(addr_bytes, six.string_types):
             bs.append(six.b(addr_bytes))
         else:
+            raise ValueError("Does this ever happen?")
             bs.append(addr_bytes)
     return b''.join(bs)
 
