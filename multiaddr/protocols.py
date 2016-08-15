@@ -113,8 +113,6 @@ def _uvarint(buf):
 
 def read_varint_code(buf):
     num, n = _uvarint(buf)
-    if num < 0:
-        raise ValueError()
     return int(num), n
 
 
