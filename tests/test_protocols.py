@@ -38,7 +38,7 @@ def test_invalid_code(valid_params, invalid_code):
         protocols.Protocol(**valid_params)
 
 
-@pytest.mark.parametrize("invalid_size", [-2, 512])
+@pytest.mark.parametrize("invalid_size", [-2, 512, 1.3])
 def test_invalid_size(valid_params, invalid_size):
     valid_params['size'] = invalid_size
     with pytest.raises(ValueError):
@@ -48,6 +48,13 @@ def test_invalid_size(valid_params, invalid_size):
 @pytest.mark.parametrize("invalid_name", [123, 1.0])
 def test_invalid_name(valid_params, invalid_name):
     valid_params['name'] = invalid_name
+    with pytest.raises(ValueError):
+        protocols.Protocol(**valid_params)
+
+
+@pytest.mark.parametrize("invalid_vcode", [3, u'a3'])
+def test_invalid_vcode(valid_params, invalid_vcode):
+    valid_params['vcode'] = invalid_vcode
     with pytest.raises(ValueError):
         protocols.Protocol(**valid_params)
 
@@ -74,6 +81,15 @@ def test_protocol_with_code():
 
     with pytest.raises(ValueError):
         proto = protocols.protocol_with_code(1234)
+
+
+def test_protocol_equality():
+    proto1 = protocols.protocol_with_name('ip4')
+    proto2 = protocols.protocol_with_code(protocols.P_IP4)
+    proto3 = protocols.protocol_with_name('onion')
+
+    assert proto1 == proto2
+    assert proto1 != proto3
 
 
 @pytest.mark.parametrize("names", [['ip4'],
@@ -132,3 +148,20 @@ def test_add_protocol_twice(patch_protocols):
     del protocols._codes_to_protocols[proto.code]
     protocols.add_protocol(proto)
     assert protocols.PROTOCOLS == [proto, proto]
+
+
+def test_protocol_repr():
+    proto = protocols.protocol_with_name('ip4')
+    assert "Protocol(code=4, name='ip4', size=32)" == repr(proto)
+
+
+@pytest.mark.parametrize("buf", [
+    b'\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x01',
+    b'\x90\x91\x92\x93\x94\x95\x96\x97\x98\x02'])
+def test_overflowing_varint(buf):
+    with pytest.raises(ValueError):
+        protocols.read_varint_code(buf)
+
+
+def test_nonterminated_varint():
+    assert protocols.read_varint_code(b'\x80\x80') == (0, 0)
