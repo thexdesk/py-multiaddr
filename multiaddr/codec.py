@@ -60,9 +60,19 @@ def bytes_to_string(buf):
     return '/'.join(st)
 
 
+int_to_hex = None
+encode_big_endian_16 = None
+
+
 def address_string_to_bytes(proto, addr_string):
-    from .util import int_to_hex
-    from .util import encode_big_endian_16
+    global int_to_hex
+    if int_to_hex is None:
+        from .util import int_to_hex
+
+    global encode_big_endian_16
+    if encode_big_endian_16 is None:
+        from .util import encode_big_endian_16
+
     if proto.code == P_IP4:  # ipv4
         try:
             ip = IPAddress(addr_string)
@@ -143,8 +153,13 @@ def address_string_to_bytes(proto, addr_string):
         raise ValueError("failed to parse %s addr: unknown" % proto.name)
 
 
+decode_big_endian_16 = None
+
+
 def address_bytes_to_string(proto, buf):
-    from .util import decode_big_endian_16
+    global decode_big_endian_16
+    if decode_big_endian_16 is None:
+        from .util import decode_big_endian_16
     if proto.code == P_IP4:
         return str(IPAddress(int(buf, 16), 4).ipv4())
     elif proto.code == P_IP6:
