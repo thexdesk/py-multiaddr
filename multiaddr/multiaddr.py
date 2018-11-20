@@ -5,6 +5,7 @@ from copy import copy
 from .codec import size_for_addr
 from .codec import string_to_bytes
 from .codec import bytes_to_string
+from .codec import protocol_with_name
 from .protocols import protocol_with_code
 from .protocols import read_varint_code
 
@@ -115,6 +116,11 @@ class Multiaddr(object):
     def value_for_protocol(self, code):
         """Return the value (if any) following the specified protocol."""
         from .util import split
+
+        if isinstance(code, str):
+            protocol = protocol_with_name(code)
+            code = protocol.code
+
         for sub_addr in split(self):
             if sub_addr.protocols()[0].code == code:
                 addr_parts = str(sub_addr).split("/")
