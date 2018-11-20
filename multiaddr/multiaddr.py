@@ -29,19 +29,18 @@ class Multiaddr(object):
     Multiaddr objects are immutable, so `encapsulate` and `decapsulate`
     return new objects rather than modify internal state.
     """
-    def __init__(self, string_addr=None, bytes_addr=None):
+
+    def __init__(self, addr):
         """Instantiate a new Multiaddr.
 
         Args:
-            string_addr (optional): A string-encoded Multiaddr
-            bytes_addr (optional): A byte-encoded Multiaddr
+            addr : A string-encoded or a byte-encoded Multiaddr
 
-        Only one of string_addr or bytes_addr may be set
         """
-        if string_addr is not None and bytes_addr is None:
-            self._bytes = string_to_bytes(string_addr)
-        elif bytes_addr is not None and string_addr is None:
-            self._bytes = bytes_addr
+        if isinstance(addr, str):
+            self._bytes = string_to_bytes(addr)
+        elif isinstance(addr, bytes):
+            self._bytes = addr
         else:
             raise ValueError("Invalid address type, must be bytes or str")
 
@@ -91,7 +90,7 @@ class Multiaddr(object):
         """
         mb = self.to_bytes()
         ob = other.to_bytes()
-        return Multiaddr(bytes_addr=b''.join([mb, ob]))
+        return Multiaddr(b''.join([mb, ob]))
 
     def decapsulate(self, other):
         """Remove a Multiaddr wrapping.

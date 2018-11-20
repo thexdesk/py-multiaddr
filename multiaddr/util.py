@@ -11,7 +11,7 @@ def split(ma):
     addrs = []
     bb = bytes_split(ma.to_bytes())
     for addr in bb:
-        addrs.append(Multiaddr(bytes_addr=binascii.hexlify(addr)))
+        addrs.append(Multiaddr(binascii.hexlify(addr)))
     return addrs
 
 
@@ -19,7 +19,7 @@ def join(multiaddrs):
     bs = []
     for ma in multiaddrs:
         bs.append(ma.to_bytes())
-    return Multiaddr(bytes_addr=b''.join(bs))
+    return Multiaddr(b''.join(bs))
 
 
 def int_to_hex(i, size):

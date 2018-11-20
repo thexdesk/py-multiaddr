@@ -209,13 +209,18 @@ def test_get_value():
 
 
 def test_bad_initialization_no_params():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         Multiaddr()
 
 
 def test_bad_initialization_too_many_params():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         Multiaddr("/ip4/0.0.0.0", "")
+
+
+def test_bad_initialization_wrong_type():
+    with pytest.raises(ValueError):
+        Multiaddr(42)
 
 
 def test_get_value_too_many_fields_protocol(monkeypatch):
