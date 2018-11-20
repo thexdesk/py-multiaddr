@@ -163,7 +163,7 @@ def address_bytes_to_string(proto, buf):
         buf = buf[num_bytes_read:]
         if len(buf) != size:
             raise ValueError("inconsistent lengths")
-        return base58.b58encode(buf)
+        return base58.b58encode(buf).decode()
     raise ValueError("unknown protocol")
 
 
