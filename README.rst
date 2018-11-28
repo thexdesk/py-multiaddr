@@ -1,5 +1,5 @@
-Multiaddr
-===============================
+py-multiaddr
+############
 
 .. image:: https://img.shields.io/pypi/v/multiaddr.svg
         :target: https://pypi.python.org/pypi/multiaddr
@@ -13,15 +13,16 @@ Multiaddr
 .. image:: https://readthedocs.org/projects/multiaddr/badge/?version=latest
         :target: https://readthedocs.org/projects/multiaddr/?badge=latest
         :alt: Documentation Status
+..
 
+    multiaddr_ implementation in Python 🐍
 
-Python implementation of jbenet_'s multiaddr_
-
-.. _jbenet: https://github.com/jbenet
 .. _multiaddr: https://github.com/jbenet/multiaddr
 
-* Free software: MIT License
-* Documentation: https://multiaddr.readthedocs.org.
+..
+
+
+.. contents:: :local:
 
 Usage
 =====
@@ -93,3 +94,32 @@ Multiaddr allows expressing tunnels very nicely.
     proxyAgain = printerOverProxy.decapsulate(printer)
     print(proxyAgain)
     # /ip4/10.20.30.40/tcp/443
+
+Maintainers
+===========
+
+Original author: `@sbuss`_.
+
+Contribute
+==========
+
+Contributions welcome. Please check out `the issues`_.
+
+Check out our `contributing document`_ for more information on how we work, and about contributing in general.
+Please be aware that all interactions related to multiformats are subject to the IPFS `Code of Conduct`_.
+
+License
+=======
+
+Dual-licensed:
+
+-  `MIT`_ © 2014 Steven Buss
+-  `Apache 2`_ © 2014 Steven Buss
+
+.. _@sbuss: https://github.com/sbuss
+.. _the issues: https://github.com/multiformats/py-multiaddr/issues
+.. _contributing document: https://github.com/multiformats/multiformats/blob/master/contributing.md
+.. _Code of Conduct: https://github.com/ipfs/community/blob/master/code-of-conduct.md
+.. _standard-readme: https://github.com/RichardLitt/standard-readme
+.. _MIT: LICENSE-MIT
+.. _Apache 2: LICENSE-APACHE2
