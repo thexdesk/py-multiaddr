@@ -127,8 +127,8 @@ def patch_protocols(monkeypatch):
     monkeypatch.setattr(protocols, '_codes_to_protocols', {})
 
 
-def test_add_protocol(patch_protocols):
-    proto = protocols.Protocol(**valid_params())
+def test_add_protocol(patch_protocols, valid_params):
+    proto = protocols.Protocol(**valid_params)
     protocols.add_protocol(proto)
     assert protocols.PROTOCOLS == [proto]
     assert proto.name in protocols._names_to_protocols
@@ -137,8 +137,8 @@ def test_add_protocol(patch_protocols):
         protocols.P_TCP, 16, "tcp", protocols.code_to_varint(protocols.P_TCP))
 
 
-def test_add_protocol_twice(patch_protocols):
-    proto = protocols.Protocol(**valid_params())
+def test_add_protocol_twice(patch_protocols, valid_params):
+    proto = protocols.Protocol(**valid_params)
     protocols.add_protocol(proto)
     with pytest.raises(ValueError):
         protocols.add_protocol(proto)
