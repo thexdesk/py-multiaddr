@@ -9,7 +9,7 @@ from .protocols import code_to_varint
 from .protocols import P_DCCP
 from .protocols import P_IP4
 from .protocols import P_IP6
-from .protocols import P_IPFS
+from .protocols import P_P2P
 from .protocols import P_ONION
 from .protocols import protocol_with_code
 from .protocols import protocol_with_name
@@ -126,18 +126,18 @@ def address_string_to_bytes(proto, addr_string):
 
         return b''.join([onion_host_bytes,
                          binascii.hexlify(encode_big_endian_16(port))])
-    elif proto.code == P_IPFS:  # ipfs
+    elif proto.code == P_P2P:  # ipfs
         # the address is a varint prefixed multihash string representation
         try:
             mm = base58.b58decode(addr_string)
         except Exception as ex:
-            raise ValueError("failed to parse ipfs addr: %s %s"
+            raise ValueError("failed to parse p2p addr: %s %s"
                              % (addr_string, str(ex)))
         size = code_to_varint(len(mm))
         mm = binascii.hexlify(mm)
         if len(mm) < 10:
             # TODO - port go-multihash so we can do this correctly
-            raise ValueError("invalid IPFS multihash: %s" % mm)
+            raise ValueError("invalid P2P multihash: %s" % mm)
         return b''.join([size, mm])
     else:
         raise ValueError("failed to parse %s addr: unknown" % proto.name)
@@ -157,7 +157,7 @@ def address_bytes_to_string(proto, buf):
         addr = base64.b32encode(addr_bytes).decode('ascii').lower()
         port = str(decode_big_endian_16(port_bytes))
         return ':'.join([addr, port])
-    elif proto.code == P_IPFS:
+    elif proto.code == P_P2P:
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
         buf = buf[num_bytes_read:]

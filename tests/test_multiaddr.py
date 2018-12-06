@@ -8,7 +8,7 @@ from multiaddr.protocols import protocol_with_name
 from multiaddr.protocols import protocols_with_string
 from multiaddr.protocols import P_IP4
 from multiaddr.protocols import P_IP6
-from multiaddr.protocols import P_IPFS
+from multiaddr.protocols import P_P2P
 from multiaddr.protocols import P_UTP
 from multiaddr.protocols import P_TCP
 from multiaddr.protocols import P_UDP
@@ -40,8 +40,8 @@ from multiaddr.util import join
      "/ip4/127.0.0.1/udp",
      "/ip4/127.0.0.1/tcp/jfodsajfidosajfoidsa",
      "/ip4/127.0.0.1/tcp",
-     "/ip4/127.0.0.1/ipfs",
-     "/ip4/127.0.0.1/ipfs/tcp"])
+     "/ip4/127.0.0.1/p2p",
+     "/ip4/127.0.0.1/p2p/tcp"])
 def test_invalid(addr_str):
     with pytest.raises(ValueError):
         Multiaddr(addr_str)
@@ -63,19 +63,19 @@ def test_invalid(addr_str):
      "/sctp/1234",
      "/udp/65535",
      "/tcp/65535",
-     "/ipfs/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC",
+     "/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC",
      "/udp/1234/sctp/1234",
      "/udp/1234/udt",
      "/udp/1234/utp",
      "/tcp/1234/http",
      "/tcp/1234/https",
-     "/ipfs/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234",
+     "/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234",
      "/ip4/127.0.0.1/udp/1234",
      "/ip4/127.0.0.1/udp/0",
      "/ip4/127.0.0.1/tcp/1234",
      "/ip4/127.0.0.1/tcp/1234/",
-     "/ip4/127.0.0.1/ipfs/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC",
-     "/ip4/127.0.0.1/ipfs/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234"])  # nopep8
+     "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC",
+     "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234"])  # nopep8
 def test_valid(addr_str):
     ma = Multiaddr(addr_str)
     assert str(ma) == addr_str.rstrip("/")
@@ -184,14 +184,14 @@ def assert_value_for_proto(multi, proto, expected):
 def test_get_value():
     ma = Multiaddr(
         "/ip4/127.0.0.1/utp/tcp/5555/udp/1234/utp/"
-        "ipfs/QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
+        "p2p/QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
 
     assert_value_for_proto(ma, P_IP4, "127.0.0.1")
     assert_value_for_proto(ma, P_UTP, "")
     assert_value_for_proto(ma, P_TCP, "5555")
     assert_value_for_proto(ma, P_UDP, "1234")
     assert_value_for_proto(
-        ma, P_IPFS, "QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
+        ma, P_P2P, "QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
 
     with pytest.raises(ProtocolNotFoundException):
         ma.value_for_protocol(P_IP6)
