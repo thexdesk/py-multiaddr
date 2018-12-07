@@ -20,23 +20,23 @@ ADDR_BYTES_MAP_STR_TEST_DATA = [
     (_names_to_protocols['tcp'], b'abcd', '43981'),
     (_names_to_protocols['onion'], b'9a18087306369043091f04d2',
      'timaq4ygg2iegci7:1234'),
-    (_names_to_protocols['ipfs'],
+    (_names_to_protocols['p2p'],
      b'221220d52ebb89d85b02a284948203a62ff28389c57c9f42beec4ec20db76a68911c0b',
      'QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC'),
 ]
 
 BYTES_MAP_STR_TEST_DATA = [
-    ("/ip4/127.0.0.1/udp/1234", b'047f0000011104d2'),
+    ("/ip4/127.0.0.1/udp/1234", b'047f000001910204d2'),
     ("/ip4/127.0.0.1/tcp/4321", b'047f0000010610e1'),
     ("/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321",
-     b'047f0000011104d2047f0000010610e1')
+     b'047f000001910204d2047f0000010610e1')
 ]
 
 
 @pytest.mark.parametrize("proto, buf, expected", [
     (_names_to_protocols['https'], b'\x01\x02\x03', 0),
     (_names_to_protocols['ip4'], b'\x01\x02\x03', 4),
-    (_names_to_protocols['ipfs'], b'\x40\x50\x60\x51', 65),
+    (_names_to_protocols['p2p'], b'\x40\x50\x60\x51', 65),
 ])
 def test_size_for_addr(proto, buf, expected):
     assert size_for_addr(proto, buf) == expected
@@ -44,14 +44,14 @@ def test_size_for_addr(proto, buf, expected):
 
 @pytest.mark.parametrize("buf, expected", [
     # "/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321"
-    (b'047f0000011104d2047f0000010610e1',
+    (b'047f000001910204d2047f0000010610e1',
      [b'\x04\x7f\x00\x00\x01',
-      b'\x11\x04\xd2',
+      b'\x91\x02\04\xd2',
       b'\x04\x7f\x00\x00\x01',
       b'\x06\x10\xe1']),
 ])
 def test_bytes_split(buf, expected):
-    assert bytes_split(buf) == expected
+    assert  bytes_split(buf) == expected
 
 
 @pytest.mark.parametrize("proto, buf, expected", ADDR_BYTES_MAP_STR_TEST_DATA)
@@ -103,7 +103,7 @@ class DummyProtocol(Protocol):
     (_names_to_protocols['onion'], 'timaq4ygg2iegci7:a'),
     (_names_to_protocols['onion'], 'timaq4ygg2iegci7:0'),
     (_names_to_protocols['onion'], 'timaq4ygg2iegci7:71234'),
-    (_names_to_protocols['ipfs'], '15230d52ebb89d85b02a284948203a'),
+    (_names_to_protocols['p2p'], '15230d52ebb89d85b02a284948203a'),
 ])
 def test_address_string_to_bytes_value_error(proto, address):
     with pytest.raises(ValueError):
@@ -112,7 +112,7 @@ def test_address_string_to_bytes_value_error(proto, address):
 
 @pytest.mark.parametrize("proto, buf", [
     (DummyProtocol(234, 32, 'test', b'123'), b'0a0b0c0d'),
-    (_names_to_protocols['ipfs'], b'15230d52ebb89d85b02a284948203a'),
+    (_names_to_protocols['p2p'], b'15230d52ebb89d85b02a284948203a'),
     (_names_to_protocols['tcp'], b'ffffffff')
 ])
 def test_address_bytes_to_string_value_error(proto, buf):
