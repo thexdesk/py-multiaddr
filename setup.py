@@ -16,7 +16,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 
-version = '0.0.2'
+version = '0.0.4'
 
 setup(
     name='multiaddr',
@@ -25,9 +25,9 @@ setup(
     long_description=readme + '\n\n' + history,
     author="Steven Buss",
     author_email='steven.buss@gmail.com',
-    url='https://github.com/sbuss/multiaddr',
+    url='https://github.com/multiformats/py-multiaddr',
     download_url=(
-        'https://github.com/sbuss/multiaddr/tarball/%s' % version),
+        'https://github.com/multiformats/py-multiaddr/tarball/%s' % version),
     packages=[
         'multiaddr',
     ],
