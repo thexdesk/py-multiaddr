@@ -18,7 +18,6 @@ matrix:
     env: TOXENV=pypy
 install:
 - pip install tox
-- pip install python-coveralls
 - pip install codecov
 script:
 - tox
