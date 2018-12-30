@@ -4,11 +4,11 @@ py-multiaddr
 .. image:: https://img.shields.io/pypi/v/multiaddr.svg
         :target: https://pypi.python.org/pypi/multiaddr
 
-.. image:: https://travis-ci.org/sbuss/py-multiaddr.svg?branch=master
-        :target: https://travis-ci.org/sbuss/py-multiaddr
+.. image:: https://travis-ci.org/multiformats/py-multiaddr.svg?branch=master
+        :target: https://travis-ci.org/multiformats/py-multiaddr
 
-.. image:: https://codecov.io/github/sbuss/py-multiaddr/coverage.svg?branch=master
-        :target: https://codecov.io/github/sbuss/py-multiaddr?branch=master
+.. image:: https://codecov.io/github/multiformats/py-multiaddr/coverage.svg?branch=master
+        :target: https://codecov.io/github/multiformats/py-multiaddr?branch=master
 
 .. image:: https://readthedocs.org/projects/multiaddr/badge/?version=latest
         :target: https://readthedocs.org/projects/multiaddr/?badge=latest
@@ -116,7 +116,6 @@ Dual-licensed:
 -  `MIT`_ © 2014 Steven Buss
 -  `Apache 2`_ © 2014 Steven Buss
 
-.. _@sbuss: https://github.com/sbuss
 .. _the issues: https://github.com/multiformats/py-multiaddr/issues
 .. _contributing document: https://github.com/multiformats/multiformats/blob/master/contributing.md
 .. _Code of Conduct: https://github.com/ipfs/community/blob/master/code-of-conduct.md
