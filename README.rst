@@ -116,7 +116,6 @@ Dual-licensed:
 -  `MIT`_ © 2014 Steven Buss
 -  `Apache 2`_ © 2014 Steven Buss
 
-.. _@sbuss: https://github.com/sbuss
 .. _the issues: https://github.com/multiformats/py-multiaddr/issues
 .. _contributing document: https://github.com/multiformats/multiformats/blob/master/contributing.md
 .. _Code of Conduct: https://github.com/ipfs/community/blob/master/code-of-conduct.md
