@@ -11,7 +11,7 @@ History
 * Increase test coverage [via fredthomsen_ `#9`_]
 
 .. _fredthomsen: https://github.com/fredthomsen
-.. _`#9`: https://github.com/sbuss/py-multiaddr/pull/9
+.. _`#9`: https://github.com/multiformats/py-multiaddr/pull/9
 
 0.0.1 (2016-1-22)
 ------------------
