@@ -1,7 +1,6 @@
 import base58
 import base64
 import binascii
-import six
 
 from netaddr import IPAddress
 
@@ -16,6 +15,7 @@ from .protocols import protocol_with_name
 from .protocols import P_SCTP
 from .protocols import P_TCP
 from .protocols import P_UDP
+from .protocols import P_UNIX
 from .protocols import read_varint_code
 
 
@@ -40,6 +40,8 @@ def string_to_bytes(string):
         if len(sp) < 1:
             raise ValueError(
                 "protocol requires address, none given: %s" % proto.name)
+        if proto.path:
+            sp = ["/" + "/".join(sp)]
         bs.append(address_string_to_bytes(proto, sp.pop(0)))
     return b''.join(bs)
 
@@ -48,14 +50,18 @@ def bytes_to_string(buf):
     st = ['']  # start with empty string so we get a leading slash on join()
     buf = binascii.unhexlify(buf)
     while buf:
+        maddr_component = ""
         code, num_bytes_read = read_varint_code(buf)
         buf = buf[num_bytes_read:]
         proto = protocol_with_code(code)
-        st.append(proto.name)
+        maddr_component += proto.name
         size = size_for_addr(proto, buf)
         if size > 0:
             addr = address_bytes_to_string(proto, binascii.hexlify(buf[:size]))
-            st.append(addr)
+            if not (proto.path and addr[0] == '/'):
+                maddr_component += '/'
+            maddr_component += addr
+        st.append(maddr_component)
         buf = buf[size:]
     return '/'.join(st)
 
@@ -149,6 +155,10 @@ def address_string_to_bytes(proto, addr_string):
             # TODO - port go-multihash so we can do this correctly
             raise ValueError("invalid P2P multihash: %s" % mm)
         return b''.join([size, mm])
+    elif proto.code == P_UNIX:
+        addr_string_bytes = addr_string.encode("ascii")
+        size = code_to_varint(len(addr_string_bytes))
+        return b''.join([size, binascii.hexlify(addr_string_bytes)])
     else:
         raise ValueError("failed to parse %s addr: unknown" % proto.name)
 
@@ -179,6 +189,10 @@ def address_bytes_to_string(proto, buf):
         if len(buf) != size:
             raise ValueError("inconsistent lengths")
         return base58.b58encode(buf).decode()
+    elif proto.code == P_UNIX:
+        buf = binascii.unhexlify(buf)
+        size, num_bytes_read = read_varint_code(buf)
+        return buf[num_bytes_read:].decode('ascii')
     raise ValueError("unknown protocol")
 
 
