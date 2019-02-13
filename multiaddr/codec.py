@@ -2,9 +2,13 @@ import base58
 import base64
 import binascii
 
+import idna
 from netaddr import IPAddress
 
 from .protocols import code_to_varint
+from .protocols import P_DNS
+from .protocols import P_DNS4
+from .protocols import P_DNS6
 from .protocols import P_DCCP
 from .protocols import P_IP4
 from .protocols import P_IP6
@@ -159,6 +163,10 @@ def address_string_to_bytes(proto, addr_string):
         addr_string_bytes = addr_string.encode("ascii")
         size = code_to_varint(len(addr_string_bytes))
         return b''.join([size, binascii.hexlify(addr_string_bytes)])
+    elif proto.code in (P_DNS, P_DNS4, P_DNS6):
+        addr_string_bytes = idna.encode(addr_string, uts46=True)
+        size = code_to_varint(len(addr_string_bytes))
+        return b''.join([size, binascii.hexlify(addr_string_bytes)])
     else:
         raise ValueError("failed to parse %s addr: unknown" % proto.name)
 
@@ -193,6 +201,10 @@ def address_bytes_to_string(proto, buf):
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
         return buf[num_bytes_read:].decode('ascii')
+    elif proto.code in (P_DNS, P_DNS4, P_DNS6):
+        buf = binascii.unhexlify(buf)
+        size, num_bytes_read = read_varint_code(buf)
+        return idna.decode(buf[num_bytes_read:])
     raise ValueError("unknown protocol")
 
 
