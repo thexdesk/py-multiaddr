@@ -1,6 +1,7 @@
 import base58
 import base64
 import binascii
+import os
 
 import idna
 from netaddr import IPAddress
@@ -160,7 +161,7 @@ def address_string_to_bytes(proto, addr_string):
             raise ValueError("invalid P2P multihash: %s" % mm)
         return b''.join([size, mm])
     elif proto.code == P_UNIX:
-        addr_string_bytes = addr_string.encode("ascii")
+        addr_string_bytes = os.fsencode(addr_string)
         size = code_to_varint(len(addr_string_bytes))
         return b''.join([size, binascii.hexlify(addr_string_bytes)])
     elif proto.code in (P_DNS, P_DNS4, P_DNS6):
@@ -200,7 +201,7 @@ def address_bytes_to_string(proto, buf):
     elif proto.code == P_UNIX:
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
-        return buf[num_bytes_read:].decode('ascii')
+        return os.fsdecode(buf[num_bytes_read:])
     elif proto.code in (P_DNS, P_DNS4, P_DNS6):
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
