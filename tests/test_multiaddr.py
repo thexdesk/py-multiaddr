@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import pytest
+import six
 
 from multiaddr.multiaddr import Multiaddr
 from multiaddr.multiaddr import ProtocolNotFoundException
@@ -89,7 +92,7 @@ def test_invalid(addr_str):
      "/dns4/موقع.وزارة-الاتصالات.مصر"])  # nopep8
 def test_valid(addr_str):
     ma = Multiaddr(addr_str)
-    assert str(ma) == addr_str.rstrip("/")
+    assert six.text_type(ma) == addr_str.rstrip("/")
 
 
 def test_eq():
@@ -250,7 +253,7 @@ def test_get_value_too_many_fields_protocol(monkeypatch):
     that the constructor specifies is ignored by the test.
     """
     monkeypatch.setattr("multiaddr.multiaddr.Multiaddr.__str__",
-                        lambda ignore: '/udp/1234/5678')
+                        lambda ignore: str('/udp/1234/5678'))
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
     with pytest.raises(ValueError):
         a.value_for_protocol(P_UDP)

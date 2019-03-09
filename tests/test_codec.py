@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import pytest
 
 from multiaddr.codec import address_bytes_to_string
@@ -27,10 +28,10 @@ ADDR_BYTES_MAP_STR_TEST_DATA = [
 # Additional test data
     (_names_to_protocols['dns4'],
      b'30786e2d2d34676272696d2e786e2d2d2d2d796d63626161616a6c6336646a3762786e6532632e786e2d2d776762683163',
-     u'موقع.وزارة-الاتصالات.مصر'),  # Explicietly mark as unicode to force it LTR
+     u'موقع.وزارة-الاتصالات.مصر'),  # Explicietly mark this as unicode to force the text to be LTR in editors
     (_names_to_protocols['dns4'],
      b'16786e2d2d667562616c6c2d6374612e6578616d706c65',
-     'fußball.example'),  # This will fail if IDNA-2003/NamePrep is used
+     u'fußball.example'),  # This will fail if IDNA-2003/NamePrep is used
 ]
 
 BYTES_MAP_STR_TEST_DATA = [

@@ -5,6 +5,7 @@ import os
 
 import idna
 from netaddr import IPAddress
+import six
 
 from .protocols import code_to_varint
 from .protocols import P_DNS
@@ -22,6 +23,23 @@ from .protocols import P_TCP
 from .protocols import P_UDP
 from .protocols import P_UNIX
 from .protocols import read_varint_code
+
+
+if hasattr(os, "fsencode") and hasattr(os, "fsdecode"):
+    fsencode = os.fsencode
+    fsdecode = os.fsdecode
+else:  # PY2
+    import sys
+
+    def fsencode(path):
+        if not isinstance(path, six.binary_type):
+            path = path.encode(sys.getfilesystemencoding())
+        return path
+
+    def fsdecode(path):
+        if not isinstance(path, six.text_type):
+            path = path.decode(sys.getfilesystemencoding())
+        return path
 
 
 def string_to_bytes(string):
@@ -150,6 +168,8 @@ def address_string_to_bytes(proto, addr_string):
     elif proto.code == P_P2P:  # ipfs
         # the address is a varint prefixed multihash string representation
         try:
+            if six.PY2 and isinstance(addr_string, unicode):
+                addr_string = addr_string.encode("ascii")
             mm = base58.b58decode(addr_string)
         except Exception as ex:
             raise ValueError("failed to parse p2p addr: %s %s"
@@ -161,7 +181,7 @@ def address_string_to_bytes(proto, addr_string):
             raise ValueError("invalid P2P multihash: %s" % mm)
         return b''.join([size, mm])
     elif proto.code == P_UNIX:
-        addr_string_bytes = os.fsencode(addr_string)
+        addr_string_bytes = fsencode(addr_string)
         size = code_to_varint(len(addr_string_bytes))
         return b''.join([size, binascii.hexlify(addr_string_bytes)])
     elif proto.code in (P_DNS, P_DNS4, P_DNS6):
@@ -201,7 +221,7 @@ def address_bytes_to_string(proto, buf):
     elif proto.code == P_UNIX:
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
-        return os.fsdecode(buf[num_bytes_read:])
+        return fsdecode(buf[num_bytes_read:])
     elif proto.code in (P_DNS, P_DNS4, P_DNS6):
         buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
