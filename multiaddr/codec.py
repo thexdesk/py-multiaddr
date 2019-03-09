@@ -1,13 +1,13 @@
 import base58
 import base64
-import binascii
 import os
 
 import idna
 from netaddr import IPAddress
 import six
+import struct
+import varint
 
-from .protocols import code_to_varint
 from .protocols import P_DNS
 from .protocols import P_DNS4
 from .protocols import P_DNS6
@@ -57,7 +57,7 @@ def string_to_bytes(string):
     while sp:
         element = sp.pop(0)
         proto = protocol_with_name(element)
-        bs.append(code_to_varint(proto.code))
+        bs.append(varint.encode(proto.code))
         if proto.size == 0:
             continue
         if len(sp) < 1:
@@ -71,7 +71,6 @@ def string_to_bytes(string):
 
 def bytes_to_string(buf):
     st = ['']  # start with empty string so we get a leading slash on join()
-    buf = binascii.unhexlify(buf)
     while buf:
         maddr_component = ""
         code, num_bytes_read = read_varint_code(buf)
@@ -80,7 +79,7 @@ def bytes_to_string(buf):
         maddr_component += proto.name
         size = size_for_addr(proto, buf)
         if size > 0:
-            addr = address_bytes_to_string(proto, binascii.hexlify(buf[:size]))
+            addr = address_bytes_to_string(proto, buf[:size])
             if not (proto.path and addr[0] == '/'):
                 maddr_component += '/'
             maddr_component += addr
@@ -89,47 +88,27 @@ def bytes_to_string(buf):
     return '/'.join(st)
 
 
-int_to_hex = None
-encode_big_endian_16 = None
-
-
 def address_string_to_bytes(proto, addr_string):
-    global int_to_hex
-    if int_to_hex is None:
-        from .util import int_to_hex
-
-    global encode_big_endian_16
-    if encode_big_endian_16 is None:
-        from .util import encode_big_endian_16
-
     if proto.code == P_IP4:  # ipv4
         try:
-            ip = IPAddress(addr_string)
-            if ip.version != 4:
-                raise ValueError("failed to parse ip4 addr: %s" % addr_string)
-            return int_to_hex(int(ip), 8)
+            return IPAddress(addr_string, version=4).packed
         except Exception:
             raise ValueError("failed to parse ip4 addr: %s" % addr_string)
     elif proto.code == P_IP6:  # ipv6
         try:
-            ip = IPAddress(addr_string)
-            if ip.version != 6:
-                raise ValueError("failed to parse ip6 addr: %s" % addr_string)
-            return int_to_hex(int(ip), 32)
+            return IPAddress(addr_string, version=6).packed
         except Exception:
             raise ValueError("failed to parse ip6 addr: %s" % addr_string)
     # tcp udp dccp sctp
     elif proto.code in [P_TCP, P_UDP, P_DCCP, P_SCTP]:
         try:
-            ip = int(addr_string)
+            return struct.pack('>H', int(addr_string, 10))
         except ValueError as ex:
             raise ValueError("failed to parse %s addr: %s"
                              % (proto.name, str(ex)))
-
-        if ip >= 65536:
+        except struct.error:
             raise ValueError("failed to parse %s addr: %s" %
                              (proto.name, "greater than 65536"))
-        return binascii.hexlify(encode_big_endian_16(ip))
     elif proto.code == P_ONION:
         addr = addr_string.split(":")
         if len(addr) != 2:
@@ -143,8 +122,7 @@ def address_string_to_bytes(proto, addr_string):
                 "failed to parse %s addr: %s not a Tor onion address."
                 % (proto.name, addr_string))
         try:
-            onion_host_bytes = binascii.hexlify(
-                base64.b32decode(addr[0].upper()))
+            onion_host_bytes = base64.b32decode(addr[0].upper())
         except Exception as ex:
             raise ValueError(
                 "failed to decode base32 %s addr: %s %s"
@@ -163,8 +141,7 @@ def address_string_to_bytes(proto, addr_string):
             raise ValueError("failed to parse %s addr: %s"
                              % (proto.name, "port less than 1"))
 
-        return b''.join([onion_host_bytes,
-                         binascii.hexlify(encode_big_endian_16(port))])
+        return b''.join([onion_host_bytes, struct.pack('>H', port)])
     elif proto.code == P_P2P:  # ipfs
         # the address is a varint prefixed multihash string representation
         try:
@@ -174,66 +151,62 @@ def address_string_to_bytes(proto, addr_string):
         except Exception as ex:
             raise ValueError("failed to parse p2p addr: %s %s"
                              % (addr_string, str(ex)))
-        size = code_to_varint(len(mm))
-        mm = binascii.hexlify(mm)
-        if len(mm) < 10:
+        size = varint.encode(len(mm))
+        if len(mm) < 5:
             # TODO - port go-multihash so we can do this correctly
             raise ValueError("invalid P2P multihash: %s" % mm)
         return b''.join([size, mm])
     elif proto.code == P_UNIX:
         addr_string_bytes = fsencode(addr_string)
-        size = code_to_varint(len(addr_string_bytes))
-        return b''.join([size, binascii.hexlify(addr_string_bytes)])
+        size = varint.encode(len(addr_string_bytes))
+        return b''.join([size, addr_string_bytes])
     elif proto.code in (P_DNS, P_DNS4, P_DNS6):
         addr_string_bytes = idna.encode(addr_string, uts46=True)
-        size = code_to_varint(len(addr_string_bytes))
-        return b''.join([size, binascii.hexlify(addr_string_bytes)])
+        size = varint.encode(len(addr_string_bytes))
+        return b''.join([size, addr_string_bytes])
     else:
         raise ValueError("failed to parse %s addr: unknown" % proto.name)
 
 
-decode_big_endian_16 = None
+packed_net_bytes_to_int = None
 
 
 def address_bytes_to_string(proto, buf):
-    global decode_big_endian_16
-    if decode_big_endian_16 is None:
-        from .util import decode_big_endian_16
+    global packed_net_bytes_to_int
+    if packed_net_bytes_to_int is None:
+        from .util import packed_net_bytes_to_int
+
     if proto.code == P_IP4:
-        return str(IPAddress(int(buf, 16), 4).ipv4())
+        return six.text_type(IPAddress(packed_net_bytes_to_int(buf), 4))
     elif proto.code == P_IP6:
-        return str(IPAddress(int(buf, 16), 6).ipv6())
+        return six.text_type(IPAddress(packed_net_bytes_to_int(buf), 6))
     elif proto.code in [P_TCP, P_UDP, P_DCCP, P_SCTP]:
-        return str(decode_big_endian_16(binascii.unhexlify(buf)))
+        if len(buf) != 2:
+            raise ValueError("Not a uint16")
+        return six.text_type(struct.unpack('>H', buf)[0])
     elif proto.code == P_ONION:
-        buf = binascii.unhexlify(buf)
         addr_bytes, port_bytes = (buf[:-2], buf[-2:])
         addr = base64.b32encode(addr_bytes).decode('ascii').lower()
-        port = str(decode_big_endian_16(port_bytes))
-        return ':'.join([addr, port])
+        port = six.text_type(struct.unpack('>H', port_bytes)[0])
+        return u':'.join([addr, port])
     elif proto.code == P_P2P:
-        buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
         buf = buf[num_bytes_read:]
         if len(buf) != size:
             raise ValueError("inconsistent lengths")
-        return base58.b58encode(buf).decode()
+        return base58.b58encode(buf).decode('ascii')
     elif proto.code == P_UNIX:
-        buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
         return fsdecode(buf[num_bytes_read:])
     elif proto.code in (P_DNS, P_DNS4, P_DNS6):
-        buf = binascii.unhexlify(buf)
         size, num_bytes_read = read_varint_code(buf)
         return idna.decode(buf[num_bytes_read:])
     raise ValueError("unknown protocol")
 
 
 def size_for_addr(proto, buf):
-    if proto.size > 0:
+    if proto.size >= 0:
         return proto.size // 8
-    elif proto.size == 0:
-        return 0
     else:
         size, num_bytes_read = read_varint_code(buf)
         return size + num_bytes_read
@@ -241,7 +214,6 @@ def size_for_addr(proto, buf):
 
 def bytes_split(buf):
     ret = []
-    buf = binascii.unhexlify(buf)
     while buf:
         code, num_bytes_read = read_varint_code(buf)
         proto = protocol_with_code(code)
