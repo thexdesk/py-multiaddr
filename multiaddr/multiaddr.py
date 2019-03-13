@@ -2,6 +2,8 @@
 import binascii
 from copy import copy
 
+import six
+
 from .codec import size_for_addr
 from .codec import string_to_bytes
 from .codec import bytes_to_string
@@ -13,7 +15,7 @@ class ProtocolNotFoundException(Exception):
     pass
 
 
-class Multiaddr:
+class Multiaddr(object):
     """Multiaddr is a representation of multiple nested internet addresses.
 
     Multiaddr is a cross-protocol, cross-platform format for representing
@@ -37,9 +39,16 @@ class Multiaddr:
             addr : A string-encoded or a byte-encoded Multiaddr
 
         """
-        if isinstance(addr, str):
+        # On Python 2 text string will often be binary anyways so detect the
+        # obvious case of a “binary-encoded” multiaddr starting with a slash
+        # and decode it into text
+        if six.PY2 and isinstance(addr, str) and addr.startswith("/"):
+            import locale
+            addr = addr.decode(locale.getpreferredencoding())
+
+        if isinstance(addr, six.text_type):
             self._bytes = string_to_bytes(addr)
-        elif isinstance(addr, bytes):
+        elif isinstance(addr, six.binary_type):
             self._bytes = addr
         else:
             raise ValueError("Invalid address type, must be bytes or str")
@@ -61,6 +70,16 @@ class Multiaddr:
         except Exception:
             raise ValueError(
                 "multiaddr failed to convert back to string. corrupted?")
+
+    # On Python 2 __str__ needs to return binary text, so expose the original
+    # function as __unicode__ and transparently encode its returned text based
+    # on the current locale
+    if six.PY2:
+        __unicode__ = __str__
+
+        def __str__(self):
+            import locale
+            return self.__unicode__().encode(locale.getpreferredencoding())
 
     def __repr__(self):
         return "<Multiaddr %s>" % str(self)
