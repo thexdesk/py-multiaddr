@@ -51,7 +51,8 @@ from multiaddr.util import join
      "/ip4/127.0.0.1/tcp/9090/http/p2p-webcrt-direct",
      "/dns",
      "/dns4",
-     "/dns6"])
+     "/dns6",
+     "/cancer"])
 def test_invalid(addr_str):
     with pytest.raises(ValueError):
         Multiaddr(addr_str)
