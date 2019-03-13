@@ -8,10 +8,14 @@ from .protocols import protocol_with_name
 from .protocols import read_varint_code
 
 
+CODEC_CACHE = {}
 def find_codec_by_name(name):
     if not name:
         raise ValueError("unknown protocol codec")
-    return importlib.import_module(".codecs.{0}".format(name), __package__)
+    codec = CODEC_CACHE.get(name)
+    if not codec:
+        codec = CODEC_CACHE[name] = importlib.import_module(".codecs.{0}".format(name), __package__)
+    return codec
 
 
 def string_to_bytes(string):
