@@ -1,18 +1,19 @@
 from multiaddr import protocols
 import pytest
+import varint
 
 
 def test_code_to_varint():
-    vi = protocols.code_to_varint(5)
-    assert vi == b'05'
-    vi = protocols.code_to_varint(150)
-    assert vi == b'9601'
+    vi = varint.encode(5)
+    assert vi == b'\x05'
+    vi = varint.encode(150)
+    assert vi == b'\x96\x01'
 
 
 def test_varint_to_code():
-    cc = protocols.varint_to_code(b'05')
+    cc = varint.decode_bytes(b'\x05')
     assert cc == 5
-    cc = protocols.varint_to_code(b'9601')
+    cc = varint.decode_bytes(b'\x96\x01')
     assert cc == 150
 
 
@@ -21,7 +22,7 @@ def valid_params():
     return {'code': protocols.P_IP4,
             'size': 32,
             'name': 'ipb4',
-            'vcode': protocols.code_to_varint(protocols.P_IP4),
+            'vcode': varint.encode(protocols.P_IP4),
             'path': False}
 
 
@@ -142,7 +143,7 @@ def test_add_protocol(patch_protocols, valid_params):
     assert proto.name in protocols._names_to_protocols
     assert proto.code in protocols._codes_to_protocols
     proto = protocols.Protocol(
-        protocols.P_TCP, 16, "tcp", protocols.code_to_varint(protocols.P_TCP))
+        protocols.P_TCP, 16, "tcp", varint.encode(protocols.P_TCP))
 
 
 def test_add_protocol_twice(patch_protocols, valid_params):

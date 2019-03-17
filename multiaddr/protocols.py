@@ -118,15 +118,6 @@ class Protocol(object):
         )
 
 
-def code_to_varint(num):
-    """Convert an integer to a varint-encoded byte."""
-    return binascii.hexlify(varint.encode(num))
-
-
-def varint_to_code(buf):
-    return varint.decode_bytes(binascii.unhexlify(buf))
-
-
 def _uvarint(buf):
     """Reads a varint from a bytes buffer and returns the value and # bytes"""
     x = 0
@@ -152,31 +143,31 @@ def read_varint_code(buf):
 
 # Protocols is the list of multiaddr protocols supported by this module.
 PROTOCOLS = [
-    Protocol(P_IP4, 32, 'ip4', code_to_varint(P_IP4)),
-    Protocol(P_TCP, 16, 'tcp', code_to_varint(P_TCP)),
-    Protocol(P_UDP, 16, 'udp', code_to_varint(P_UDP)),
-    Protocol(P_DCCP, 16, 'dccp', code_to_varint(P_DCCP)),
-    Protocol(P_IP6, 128, 'ip6', code_to_varint(P_IP6)),
-    Protocol(P_IP6ZONE,	LENGTH_PREFIXED_VAR_SIZE, 'ip6zone', code_to_varint(P_IP6ZONE)),
-    Protocol(P_DNS, LENGTH_PREFIXED_VAR_SIZE, 'dns', code_to_varint(P_DNS)),
-    Protocol(P_DNS4, LENGTH_PREFIXED_VAR_SIZE, 'dns4', code_to_varint(P_DNS4)),
-    Protocol(P_DNS6, LENGTH_PREFIXED_VAR_SIZE, 'dns6', code_to_varint(P_DNS6)),
-    Protocol(P_DNSADDR,	LENGTH_PREFIXED_VAR_SIZE, 'dnsaddr', code_to_varint(P_DNSADDR)),
-    Protocol(P_SCTP, 16, 'sctp', code_to_varint(P_SCTP)),
-    Protocol(P_UDT, 0, 'udt', code_to_varint(P_UDT)),
-    Protocol(P_UTP, 0, 'utp', code_to_varint(P_UTP)),
-    Protocol(P_P2P, LENGTH_PREFIXED_VAR_SIZE, 'p2p', code_to_varint(P_P2P)),
-    Protocol(P_ONION, 96, 'onion', code_to_varint(P_ONION)),
-    Protocol(P_QUIC, 0, 'quic', code_to_varint(P_QUIC)),
-    Protocol(P_HTTP, 0, 'http', code_to_varint(P_HTTP)),
-    Protocol(P_HTTPS, 0, 'https', code_to_varint(P_HTTPS)),
-    Protocol(P_WS, 0, 'ws', code_to_varint(P_WS)),
-    Protocol(P_WSS, 0, 'wss', code_to_varint(P_WSS)),
-    Protocol(P_P2P_WEBSOCKET_STAR, 0, 'p2p-websocket-star', code_to_varint(P_P2P_WEBSOCKET_STAR)),
-    Protocol(P_P2P_WEBRTC_STAR, 0, 'p2p-webrtc-star', code_to_varint(P_P2P_WEBRTC_STAR)),
-    Protocol(P_P2P_WEBRTC_DIRECT, 0, 'p2p-webrtc-direct', code_to_varint(P_P2P_WEBRTC_DIRECT)),
-    Protocol(P_P2P_CIRCUIT, 0, 'p2p-circuit', code_to_varint(P_P2P_CIRCUIT)),
-    Protocol(P_UNIX, LENGTH_PREFIXED_VAR_SIZE, 'unix', code_to_varint(P_UNIX), path=True),
+    Protocol(P_IP4, 32, 'ip4', varint.encode(P_IP4)),
+    Protocol(P_TCP, 16, 'tcp', varint.encode(P_TCP)),
+    Protocol(P_UDP, 16, 'udp', varint.encode(P_UDP)),
+    Protocol(P_DCCP, 16, 'dccp', varint.encode(P_DCCP)),
+    Protocol(P_IP6, 128, 'ip6', varint.encode(P_IP6)),
+    Protocol(P_IP6ZONE,	LENGTH_PREFIXED_VAR_SIZE, 'ip6zone', varint.encode(P_IP6ZONE)),
+    Protocol(P_DNS, LENGTH_PREFIXED_VAR_SIZE, 'dns', varint.encode(P_DNS)),
+    Protocol(P_DNS4, LENGTH_PREFIXED_VAR_SIZE, 'dns4', varint.encode(P_DNS4)),
+    Protocol(P_DNS6, LENGTH_PREFIXED_VAR_SIZE, 'dns6', varint.encode(P_DNS6)),
+    Protocol(P_DNSADDR,	LENGTH_PREFIXED_VAR_SIZE, 'dnsaddr', varint.encode(P_DNSADDR)),
+    Protocol(P_SCTP, 16, 'sctp', varint.encode(P_SCTP)),
+    Protocol(P_UDT, 0, 'udt', varint.encode(P_UDT)),
+    Protocol(P_UTP, 0, 'utp', varint.encode(P_UTP)),
+    Protocol(P_P2P, LENGTH_PREFIXED_VAR_SIZE, 'p2p', varint.encode(P_P2P)),
+    Protocol(P_ONION, 96, 'onion', varint.encode(P_ONION)),
+    Protocol(P_QUIC, 0, 'quic', varint.encode(P_QUIC)),
+    Protocol(P_HTTP, 0, 'http', varint.encode(P_HTTP)),
+    Protocol(P_HTTPS, 0, 'https', varint.encode(P_HTTPS)),
+    Protocol(P_WS, 0, 'ws', varint.encode(P_WS)),
+    Protocol(P_WSS, 0, 'wss', varint.encode(P_WSS)),
+    Protocol(P_P2P_WEBSOCKET_STAR, 0, 'p2p-websocket-star', varint.encode(P_P2P_WEBSOCKET_STAR)),
+    Protocol(P_P2P_WEBRTC_STAR, 0, 'p2p-webrtc-star', varint.encode(P_P2P_WEBRTC_STAR)),
+    Protocol(P_P2P_WEBRTC_DIRECT, 0, 'p2p-webrtc-direct', varint.encode(P_P2P_WEBRTC_DIRECT)),
+    Protocol(P_P2P_CIRCUIT, 0, 'p2p-circuit', varint.encode(P_P2P_CIRCUIT)),
+    Protocol(P_UNIX, LENGTH_PREFIXED_VAR_SIZE, 'unix', varint.encode(P_UNIX), path=True),
 ]
 
 _names_to_protocols = dict((proto.name, proto) for proto in PROTOCOLS)

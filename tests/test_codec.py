@@ -15,30 +15,33 @@ from multiaddr.protocols import Protocol
 # through the go implementation of multiaddr.
 # https://github.com/jbenet/multiaddr
 ADDR_BYTES_MAP_STR_TEST_DATA = [
-    (_names_to_protocols['ip4'], b'0a0b0c0d', '10.11.12.13'),
-    (_names_to_protocols['ip6'], b'1aa12bb23cc34dd45ee56ff67ab78ac8',
+    (_names_to_protocols['ip4'], b'\x0a\x0b\x0c\x0d', '10.11.12.13'),
+    (_names_to_protocols['ip6'],
+     b'\x1a\xa1\x2b\xb2\x3c\xc3\x4d\xd4\x5e\xe5\x6f\xf6\x7a\xb7\x8a\xc8',
      '1aa1:2bb2:3cc3:4dd4:5ee5:6ff6:7ab7:8ac8'),
-    (_names_to_protocols['tcp'], b'abcd', '43981'),
-    (_names_to_protocols['onion'], b'9a18087306369043091f04d2',
+    (_names_to_protocols['tcp'], b'\xab\xcd', '43981'),
+    (_names_to_protocols['onion'],
+     b'\x9a\x18\x08\x73\x06\x36\x90\x43\x09\x1f\x04\xd2',
      'timaq4ygg2iegci7:1234'),
     (_names_to_protocols['p2p'],
-     b'221220d52ebb89d85b02a284948203a62ff28389c57c9f42beec4ec20db76a68911c0b',
+     b'\x22\x12\x20\xd5\x2e\xbb\x89\xd8\x5b\x02\xa2\x84\x94\x82\x03\xa6\x2f\xf2'
+     b'\x83\x89\xc5\x7c\x9f\x42\xbe\xec\x4e\xc2\x0d\xb7\x6a\x68\x91\x1c\x0b',
      'QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC'),
 
 # Additional test data
     (_names_to_protocols['dns4'],
-     b'30786e2d2d34676272696d2e786e2d2d2d2d796d63626161616a6c6336646a3762786e6532632e786e2d2d776762683163',
+     b'\x30xn--4gbrim.xn----ymcbaaajlc6dj7bxne2c.xn--wgbh1c',
      u'موقع.وزارة-الاتصالات.مصر'),  # Explicietly mark this as unicode to force the text to be LTR in editors
     (_names_to_protocols['dns4'],
-     b'16786e2d2d667562616c6c2d6374612e6578616d706c65',
+     b'\x16xn--fuball-cta.example',
      u'fußball.example'),  # This will fail if IDNA-2003/NamePrep is used
 ]
 
 BYTES_MAP_STR_TEST_DATA = [
-    ("/ip4/127.0.0.1/udp/1234", b'047f000001910204d2'),
-    ("/ip4/127.0.0.1/tcp/4321", b'047f0000010610e1'),
+    ("/ip4/127.0.0.1/udp/1234", b'\x04\x7f\x00\x00\x01\x91\x02\x04\xd2'),
+    ("/ip4/127.0.0.1/tcp/4321", b'\x04\x7f\x00\x00\x01\x06\x10\xe1'),
     ("/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321",
-     b'047f000001910204d2047f0000010610e1')
+     b'\x04\x7f\x00\x00\x01\x91\x02\x04\xd2\x04\x7f\x00\x00\x01\x06\x10\xe1')
 ]
 
 
@@ -53,7 +56,7 @@ def test_size_for_addr(proto, buf, expected):
 
 @pytest.mark.parametrize("buf, expected", [
     # "/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321"
-    (b'047f000001910204d2047f0000010610e1',
+    (b'\x04\x7f\x00\x00\x01\x91\x02\x04\xd2\x04\x7f\x00\x00\x01\x06\x10\xe1',
      [b'\x04\x7f\x00\x00\x01',
       b'\x91\x02\04\xd2',
       b'\x04\x7f\x00\x00\x01',
@@ -121,9 +124,9 @@ def test_address_string_to_bytes_value_error(proto, address):
 
 
 @pytest.mark.parametrize("proto, buf", [
-    (DummyProtocol(234, 32, 'test', b'123'), b'0a0b0c0d'),
-    (_names_to_protocols['p2p'], b'15230d52ebb89d85b02a284948203a'),
-    (_names_to_protocols['tcp'], b'ffffffff')
+    (DummyProtocol(234, 32, 'test', b'123'), b'\x0a\x0b\x0c\x0d'),
+    (_names_to_protocols['p2p'], b'\x15\x23\x0d\x52\xeb\xb8\x9d\x85\xb0\x2a\x28\x49\x48\x20\x3a'),
+    (_names_to_protocols['tcp'], b'\xff\xff\xff\xff')
 ])
 def test_address_bytes_to_string_value_error(proto, buf):
     with pytest.raises(ValueError):

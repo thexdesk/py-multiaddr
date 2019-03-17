@@ -71,6 +71,7 @@ def test_invalid(addr_str):
      "/udp/1234",
      "/tcp/1234",
      "/sctp/1234",
+     "/utp",
      "/udp/65535",
      "/tcp/65535",
      "/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC",

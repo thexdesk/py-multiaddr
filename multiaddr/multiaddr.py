@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import binascii
 from copy import copy
 
 import six
@@ -90,7 +89,7 @@ class Multiaddr(object):
 
     def protocols(self):
         """Returns a list of Protocols this Multiaddr includes."""
-        buf = binascii.unhexlify(self.to_bytes())
+        buf = self.to_bytes()
         protos = []
         while buf:
             code, num_bytes_read = read_varint_code(buf)
