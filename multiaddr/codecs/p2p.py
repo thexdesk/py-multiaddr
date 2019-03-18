@@ -4,7 +4,12 @@ import base58
 import six
 import varint
 
+from ..codec import LENGTH_PREFIXED_VAR_SIZE
 from ..protocols import read_varint_code
+
+
+SIZE = LENGTH_PREFIXED_VAR_SIZE
+IS_PATH = False
 
 
 def to_bytes(proto, string):

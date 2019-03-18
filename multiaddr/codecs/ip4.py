@@ -6,6 +6,10 @@ import six
 from ..util import packed_net_bytes_to_int
 
 
+SIZE = 32
+IS_PATH = False
+
+
 def to_bytes(proto, string):
 	try:
 		return netaddr.IPAddress(string, version=4).packed

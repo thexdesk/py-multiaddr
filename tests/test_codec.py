@@ -47,13 +47,13 @@ BYTES_MAP_STR_TEST_DATA = [
 ]
 
 
-@pytest.mark.parametrize("proto, buf, expected", [
-    (_names_to_protocols['https'], b'\x01\x02\x03', 0),
-    (_names_to_protocols['ip4'], b'\x01\x02\x03', 4),
-    (_names_to_protocols['p2p'], b'\x40\x50\x60\x51', 65),
+@pytest.mark.parametrize("codec_name, buf, expected", [
+    (None, b'\x01\x02\x03', 0),
+    ('ip4', b'\x01\x02\x03', 4),
+    ('p2p', b'\x40\x50\x60\x51', 65),
 ])
-def test_size_for_addr(proto, buf, expected):
-    assert size_for_addr(proto, buf) == expected
+def test_size_for_addr(codec_name, buf, expected):
+    assert size_for_addr(find_codec_by_name(codec_name), buf) == expected
 
 
 @pytest.mark.parametrize("buf, expected", [
@@ -90,18 +90,15 @@ def test_bytes_to_string(string, buf):
 
 
 class DummyProtocol(Protocol):
-    def __init__(self, code, size, name, vcode, codec=None, path=False):
+    def __init__(self, code, name, codec=None):
         self.code = code
-        self.size = size
         self.name = name
-        self.vcode = vcode
         self.codec = codec
-        self.path = path
 
 
 class UnparsableProtocol(DummyProtocol):
 	def __init__(self):
-		super(UnparsableProtocol, self).__init__(333, 16, "unparsable", b"\xcd\x02")
+		super(UnparsableProtocol, self).__init__(333, "unparsable", "?")
 
 
 @pytest.fixture
@@ -133,7 +130,6 @@ def test_bytes_to_string_value_error(protocol_extension, bytes):
 
 
 @pytest.mark.parametrize("proto, address", [
-    (DummyProtocol(234, 32, 'test', b'123'), '1.2.3.4'),
     (_names_to_protocols['ip4'], '1124.2.3'),
     (_names_to_protocols['ip6'], '123.123.123.123'),
     (_names_to_protocols['tcp'], 'a'),
@@ -151,7 +147,6 @@ def test_codec_to_bytes_value_error(proto, address):
 
 
 @pytest.mark.parametrize("proto, buf", [
-    (DummyProtocol(234, 32, 'test', b'123'), b'\x0a\x0b\x0c\x0d'),
     (_names_to_protocols['p2p'], b'\x15\x23\x0d\x52\xeb\xb8\x9d\x85\xb0\x2a\x28\x49\x48\x20\x3a'),
     (_names_to_protocols['tcp'], b'\xff\xff\xff\xff')
 ])

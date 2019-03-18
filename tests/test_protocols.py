@@ -22,10 +22,8 @@ def test_varint_to_code():
 @pytest.fixture
 def valid_params():
     return {'code': protocols.P_IP4,
-            'size': 32,
             'name': 'ipb4',
-            'codec': 'ipb',
-            'path': False}
+            'codec': 'ipb'}
 
 
 def test_valid(valid_params):
@@ -42,23 +40,9 @@ def test_invalid_code(valid_params, invalid_code):
         protocols.Protocol(**valid_params)
 
 
-@pytest.mark.parametrize("invalid_size", [-2, 512, 1.3])
-def test_invalid_size(valid_params, invalid_size):
-    valid_params['size'] = invalid_size
-    with pytest.raises(ValueError):
-        protocols.Protocol(**valid_params)
-
-
 @pytest.mark.parametrize("invalid_name", [123, 1.0])
 def test_invalid_name(valid_params, invalid_name):
     valid_params['name'] = invalid_name
-    with pytest.raises(ValueError):
-        protocols.Protocol(**valid_params)
-
-
-@pytest.mark.parametrize("invalid_path", [123, '123', 0.123])
-def test_invalid_path(valid_params, invalid_path):
-    valid_params['path'] = invalid_path
     with pytest.raises(ValueError):
         protocols.Protocol(**valid_params)
 
@@ -151,7 +135,7 @@ def test_add_protocol(patch_protocols, valid_params):
     assert protocols.PROTOCOLS == [proto]
     assert proto.name in protocols._names_to_protocols
     assert proto.code in protocols._codes_to_protocols
-    proto = protocols.Protocol(protocols.P_TCP, 16, "tcp", "uint16be")
+    proto = protocols.Protocol(protocols.P_TCP, "tcp", "uint16be")
 
 
 def test_add_protocol_twice(patch_protocols, valid_params):
@@ -169,7 +153,7 @@ def test_add_protocol_twice(patch_protocols, valid_params):
 
 def test_protocol_repr():
     proto = protocols.protocol_with_name('ip4')
-    assert "Protocol(code=4, name='ip4', size=32, codec='ip4', path=False)" == repr(proto)
+    assert "Protocol(code=4, name='ip4', codec='ip4')" == repr(proto)
 
 
 @pytest.mark.parametrize("buf", [

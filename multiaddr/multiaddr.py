@@ -3,6 +3,7 @@ from copy import copy
 
 import six
 
+from .codec import find_codec_by_name
 from .codec import size_for_addr
 from .codec import string_to_bytes
 from .codec import bytes_to_string
@@ -93,9 +94,13 @@ class Multiaddr(object):
         while buf:
             code, num_bytes_read = read_varint_code(buf)
             proto = protocol_with_code(code)
+            try:
+                codec = find_codec_by_name(proto.codec)
+            except ImportError as exc:
+                six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
             protos.append(proto)
             buf = buf[num_bytes_read:]
-            size = size_for_addr(proto, buf)
+            size = size_for_addr(codec, buf)
             buf = buf[size:]
         return protos
 
