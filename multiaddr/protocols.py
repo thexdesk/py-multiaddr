@@ -160,7 +160,7 @@ PROTOCOLS = [
     Protocol(P_SCTP, 16, 'sctp', 'uint16be'),
     Protocol(P_UDT, 0, 'udt'),
     Protocol(P_UTP, 0, 'utp'),
-    Protocol(P_P2P, LENGTH_PREFIXED_VAR_SIZE, 'p2p', 'multihash'),
+    Protocol(P_P2P, LENGTH_PREFIXED_VAR_SIZE, 'p2p', 'p2p'),
     Protocol(P_ONION, 96, 'onion', 'onion'),
     Protocol(P_QUIC, 0, 'quic'),
     Protocol(P_HTTP, 0, 'http'),
