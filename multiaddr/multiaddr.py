@@ -42,8 +42,7 @@ class Multiaddr(object):
         # obvious case of a “binary-encoded” multiaddr starting with a slash
         # and decode it into text
         if six.PY2 and isinstance(addr, str) and addr.startswith("/"):
-            import locale
-            addr = addr.decode(locale.getpreferredencoding())
+            addr = addr.decode("utf-8")
 
         if isinstance(addr, six.text_type):
             self._bytes = string_to_bytes(addr)

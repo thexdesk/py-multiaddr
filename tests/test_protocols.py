@@ -1,6 +1,8 @@
-from multiaddr import protocols
+import six
 import pytest
 import varint
+
+from multiaddr import protocols
 
 
 def test_code_to_varint():
@@ -22,7 +24,7 @@ def valid_params():
     return {'code': protocols.P_IP4,
             'size': 32,
             'name': 'ipb4',
-            'vcode': varint.encode(protocols.P_IP4),
+            'codec': 'ipb',
             'path': False}
 
 
@@ -54,13 +56,6 @@ def test_invalid_name(valid_params, invalid_name):
         protocols.Protocol(**valid_params)
 
 
-@pytest.mark.parametrize("invalid_vcode", [3, u'a3'])
-def test_invalid_vcode(valid_params, invalid_vcode):
-    valid_params['vcode'] = invalid_vcode
-    with pytest.raises(ValueError):
-        protocols.Protocol(**valid_params)
-
-
 @pytest.mark.parametrize("invalid_path", [123, '123', 0.123])
 def test_invalid_path(valid_params, invalid_path):
     valid_params['path'] = invalid_path
@@ -68,9 +63,23 @@ def test_invalid_path(valid_params, invalid_path):
         protocols.Protocol(**valid_params)
 
 
+@pytest.mark.skipif(six.PY2, reason="Binary string are allowed on Python 2")
+@pytest.mark.parametrize("invalid_codec", [b"ip4", 123, 0.123])
+def test_invalid_codec(valid_params, invalid_codec):
+    valid_params['codec'] = invalid_codec
+    with pytest.raises(ValueError):
+        protocols.Protocol(**valid_params)
+
+
 @pytest.mark.parametrize("name", ["foo-str", u"foo-u"])
 def test_valid_names(valid_params, name):
     valid_params['name'] = name
+    test_valid(valid_params)
+
+
+@pytest.mark.parametrize("codec", ["ip4", u"ip6"])
+def test_valid_codecs(valid_params, codec):
+    valid_params['codec'] = codec
     test_valid(valid_params)
 
 
@@ -142,8 +151,7 @@ def test_add_protocol(patch_protocols, valid_params):
     assert protocols.PROTOCOLS == [proto]
     assert proto.name in protocols._names_to_protocols
     assert proto.code in protocols._codes_to_protocols
-    proto = protocols.Protocol(
-        protocols.P_TCP, 16, "tcp", varint.encode(protocols.P_TCP))
+    proto = protocols.Protocol(protocols.P_TCP, 16, "tcp", "uint16be")
 
 
 def test_add_protocol_twice(patch_protocols, valid_params):
@@ -161,7 +169,7 @@ def test_add_protocol_twice(patch_protocols, valid_params):
 
 def test_protocol_repr():
     proto = protocols.protocol_with_name('ip4')
-    assert "Protocol(code=4, name='ip4', size=32, path=False)" == repr(proto)
+    assert "Protocol(code=4, name='ip4', size=32, codec='ip4', path=False)" == repr(proto)
 
 
 @pytest.mark.parametrize("buf", [

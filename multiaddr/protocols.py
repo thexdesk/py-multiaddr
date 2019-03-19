@@ -73,18 +73,19 @@ class Protocol(object):
         "size",   # int (-1 indicates a length-prefixed variable size)
         "name",   # string
         "vcode",  # bytes
+        "codec",  # string
         "path",   # bool (True indicates a path protocol (eg unix, http))
     ]
 
-    def __init__(self, code, size, name, vcode, path=False):
+    def __init__(self, code, size, name, codec=None, path=False):
         if not isinstance(code, six.integer_types):
             raise ValueError("code must be an integer")
         if not isinstance(size, six.integer_types):
             raise ValueError("size must be an integer")
         if not isinstance(name, six.string_types):
             raise ValueError("name must be a string")
-        if not isinstance(vcode, six.binary_type):
-            raise ValueError("vcode must be binary")
+        if not isinstance(codec, six.string_types) and codec is not None:
+            raise ValueError("codec must be a string or None")
         if not isinstance(path, bool):
             raise ValueError("path must be a boolean")
 
@@ -96,7 +97,8 @@ class Protocol(object):
         self.code = code
         self.size = size
         self.name = name
-        self.vcode = vcode
+        self.vcode = varint.encode(code)
+        self.codec = codec
         self.path = path
 
     def __eq__(self, other):
@@ -104,16 +106,18 @@ class Protocol(object):
                     self.size == other.size,
                     self.name == other.name,
                     self.vcode == other.vcode,
+                    self.codec == other.codec,
                     self.path == other.path))
 
     def __ne__(self, other):
         return not self == other
 
     def __repr__(self):
-        return "Protocol(code={code}, name='{name}', size={size}, path={path})".format(
+        return "Protocol(code={code}, name='{name}', size={size}, codec={codec!r}, path={path})".format(
             code=self.code,
             size=self.size,
             name=self.name,
+            codec=self.codec,
             path=self.path,
         )
 
@@ -143,31 +147,31 @@ def read_varint_code(buf):
 
 # Protocols is the list of multiaddr protocols supported by this module.
 PROTOCOLS = [
-    Protocol(P_IP4, 32, 'ip4', varint.encode(P_IP4)),
-    Protocol(P_TCP, 16, 'tcp', varint.encode(P_TCP)),
-    Protocol(P_UDP, 16, 'udp', varint.encode(P_UDP)),
-    Protocol(P_DCCP, 16, 'dccp', varint.encode(P_DCCP)),
-    Protocol(P_IP6, 128, 'ip6', varint.encode(P_IP6)),
-    Protocol(P_IP6ZONE,	LENGTH_PREFIXED_VAR_SIZE, 'ip6zone', varint.encode(P_IP6ZONE)),
-    Protocol(P_DNS, LENGTH_PREFIXED_VAR_SIZE, 'dns', varint.encode(P_DNS)),
-    Protocol(P_DNS4, LENGTH_PREFIXED_VAR_SIZE, 'dns4', varint.encode(P_DNS4)),
-    Protocol(P_DNS6, LENGTH_PREFIXED_VAR_SIZE, 'dns6', varint.encode(P_DNS6)),
-    Protocol(P_DNSADDR,	LENGTH_PREFIXED_VAR_SIZE, 'dnsaddr', varint.encode(P_DNSADDR)),
-    Protocol(P_SCTP, 16, 'sctp', varint.encode(P_SCTP)),
-    Protocol(P_UDT, 0, 'udt', varint.encode(P_UDT)),
-    Protocol(P_UTP, 0, 'utp', varint.encode(P_UTP)),
-    Protocol(P_P2P, LENGTH_PREFIXED_VAR_SIZE, 'p2p', varint.encode(P_P2P)),
-    Protocol(P_ONION, 96, 'onion', varint.encode(P_ONION)),
-    Protocol(P_QUIC, 0, 'quic', varint.encode(P_QUIC)),
-    Protocol(P_HTTP, 0, 'http', varint.encode(P_HTTP)),
-    Protocol(P_HTTPS, 0, 'https', varint.encode(P_HTTPS)),
-    Protocol(P_WS, 0, 'ws', varint.encode(P_WS)),
-    Protocol(P_WSS, 0, 'wss', varint.encode(P_WSS)),
-    Protocol(P_P2P_WEBSOCKET_STAR, 0, 'p2p-websocket-star', varint.encode(P_P2P_WEBSOCKET_STAR)),
-    Protocol(P_P2P_WEBRTC_STAR, 0, 'p2p-webrtc-star', varint.encode(P_P2P_WEBRTC_STAR)),
-    Protocol(P_P2P_WEBRTC_DIRECT, 0, 'p2p-webrtc-direct', varint.encode(P_P2P_WEBRTC_DIRECT)),
-    Protocol(P_P2P_CIRCUIT, 0, 'p2p-circuit', varint.encode(P_P2P_CIRCUIT)),
-    Protocol(P_UNIX, LENGTH_PREFIXED_VAR_SIZE, 'unix', varint.encode(P_UNIX), path=True),
+    Protocol(P_IP4, 32, 'ip4', 'ip4'),
+    Protocol(P_TCP, 16, 'tcp', 'uint16be'),
+    Protocol(P_UDP, 16, 'udp', 'uint16be'),
+    Protocol(P_DCCP, 16, 'dccp', 'uint16be'),
+    Protocol(P_IP6, 128, 'ip6', 'ip6'),
+    Protocol(P_IP6ZONE,	LENGTH_PREFIXED_VAR_SIZE, 'ip6zone'),
+    Protocol(P_DNS, LENGTH_PREFIXED_VAR_SIZE, 'dns', 'idna'),
+    Protocol(P_DNS4, LENGTH_PREFIXED_VAR_SIZE, 'dns4', 'idna'),
+    Protocol(P_DNS6, LENGTH_PREFIXED_VAR_SIZE, 'dns6', 'idna'),
+    Protocol(P_DNSADDR,	LENGTH_PREFIXED_VAR_SIZE, 'dnsaddr', 'idna'),
+    Protocol(P_SCTP, 16, 'sctp', 'uint16be'),
+    Protocol(P_UDT, 0, 'udt'),
+    Protocol(P_UTP, 0, 'utp'),
+    Protocol(P_P2P, LENGTH_PREFIXED_VAR_SIZE, 'p2p', 'p2p'),
+    Protocol(P_ONION, 96, 'onion', 'onion'),
+    Protocol(P_QUIC, 0, 'quic'),
+    Protocol(P_HTTP, 0, 'http'),
+    Protocol(P_HTTPS, 0, 'https'),
+    Protocol(P_WS, 0, 'ws'),
+    Protocol(P_WSS, 0, 'wss'),
+    Protocol(P_P2P_WEBSOCKET_STAR, 0, 'p2p-websocket-star'),
+    Protocol(P_P2P_WEBRTC_STAR, 0, 'p2p-webrtc-star'),
+    Protocol(P_P2P_WEBRTC_DIRECT, 0, 'p2p-webrtc-direct'),
+    Protocol(P_P2P_CIRCUIT, 0, 'p2p-circuit'),
+    Protocol(P_UNIX, LENGTH_PREFIXED_VAR_SIZE, 'unix', 'fspath', path=True),
 ]
 
 _names_to_protocols = dict((proto.name, proto) for proto in PROTOCOLS)
