@@ -37,7 +37,10 @@ def string_to_bytes(string):
     for proto, codec, value in string_iter(string):
         bs.append(varint.encode(proto.code))
         if value is not None:
-            bs.append(codec.to_bytes(proto, value))
+            buf = codec.to_bytes(proto, value)
+            if codec.SIZE == LENGTH_PREFIXED_VAR_SIZE:
+                bs.append(varint.encode(len(buf)))
+            bs.append(buf)
     return b''.join(bs)
 
 
@@ -56,10 +59,9 @@ def bytes_to_string(buf):
 
 def size_for_addr(codec, buf):
     if codec.SIZE >= 0:
-        return codec.SIZE // 8
+        return codec.SIZE // 8, 0
     else:
-        size, num_bytes_read = read_varint_code(buf)
-        return size + num_bytes_read
+        return read_varint_code(buf)
 
 
 def string_iter(string):
@@ -102,7 +104,7 @@ def bytes_iter(buf):
 			codec = find_codec_by_name(proto.codec)
 		except ImportError as exc:
 			six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
-		size = size_for_addr(codec, buf[num_bytes_read:])
-		length = size + num_bytes_read
-		yield proto, codec, buf[num_bytes_read:length]
+		size, num_bytes_read2 = size_for_addr(codec, buf[num_bytes_read:])
+		length = size + num_bytes_read2 + num_bytes_read
+		yield proto, codec, buf[(length - size):length]
 		buf = buf[length:]

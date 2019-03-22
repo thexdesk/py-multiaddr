@@ -26,16 +26,16 @@ ADDR_BYTES_MAP_STR_TEST_DATA = [
      b'\x9a\x18\x08\x73\x06\x36\x90\x43\x09\x1f\x04\xd2',
      'timaq4ygg2iegci7:1234'),
     (_names_to_protocols['p2p'],
-     b'\x22\x12\x20\xd5\x2e\xbb\x89\xd8\x5b\x02\xa2\x84\x94\x82\x03\xa6\x2f\xf2'
+     b'\x12\x20\xd5\x2e\xbb\x89\xd8\x5b\x02\xa2\x84\x94\x82\x03\xa6\x2f\xf2'
      b'\x83\x89\xc5\x7c\x9f\x42\xbe\xec\x4e\xc2\x0d\xb7\x6a\x68\x91\x1c\x0b',
      'QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC'),
 
 # Additional test data
     (_names_to_protocols['dns4'],
-     b'\x30xn--4gbrim.xn----ymcbaaajlc6dj7bxne2c.xn--wgbh1c',
+     b'xn--4gbrim.xn----ymcbaaajlc6dj7bxne2c.xn--wgbh1c',
      u'موقع.وزارة-الاتصالات.مصر'),  # Explicietly mark this as unicode to force the text to be LTR in editors
     (_names_to_protocols['dns4'],
-     b'\x16xn--fuball-cta.example',
+     b'xn--fuball-cta.example',
      u'fußball.example'),  # This will fail if IDNA-2003/NamePrep is used
 ]
 
@@ -48,9 +48,9 @@ BYTES_MAP_STR_TEST_DATA = [
 
 
 @pytest.mark.parametrize("codec_name, buf, expected", [
-    (None, b'\x01\x02\x03', 0),
-    ('ip4', b'\x01\x02\x03', 4),
-    ('p2p', b'\x40\x50\x60\x51', 65),
+    (None, b'\x01\x02\x03', (0, 0)),
+    ('ip4', b'\x01\x02\x03', (4, 0)),
+    ('p2p', b'\x40\x50\x60\x51', (64, 1)),
 ])
 def test_size_for_addr(codec_name, buf, expected):
     assert size_for_addr(find_codec_by_name(codec_name), buf) == expected
@@ -147,7 +147,6 @@ def test_codec_to_bytes_value_error(proto, address):
 
 
 @pytest.mark.parametrize("proto, buf", [
-    (_names_to_protocols['p2p'], b'\x15\x23\x0d\x52\xeb\xb8\x9d\x85\xb0\x2a\x28\x49\x48\x20\x3a'),
     (_names_to_protocols['tcp'], b'\xff\xff\xff\xff')
 ])
 def test_codec_to_string_value_error(proto, buf):
