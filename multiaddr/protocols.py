@@ -3,6 +3,9 @@ import binascii
 import six
 import varint
 
+from .codecs import codec_by_name
+
+
 # source of protocols https://github.com/multiformats/multicodec/blob/master/table.csv#L382
 # replicating table here to:
 # 1. avoid parsing the csv
@@ -63,7 +66,6 @@ _CODES = [
 ]
 
 
-find_codec_by_name = None
 
 class Protocol(object):
     __slots__ = [
@@ -89,19 +91,11 @@ class Protocol(object):
 
     @property
     def size(self):
-        global find_codec_by_name
-        if find_codec_by_name is None:
-            from .codec import find_codec_by_name
-
-        return find_codec_by_name(self.codec).SIZE
+        return codec_by_name(self.codec).SIZE
 
     @property
     def path(self):
-        global find_codec_by_name
-        if find_codec_by_name is None:
-            from .codec import find_codec_by_name
-
-        return find_codec_by_name(self.codec).IS_PATH
+        return codec_by_name(self.codec).IS_PATH
 
     @property
     def vcode(self):

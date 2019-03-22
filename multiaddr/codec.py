@@ -1,32 +1,14 @@
 # -*- encoding: utf-8 -*-
-from __future__ import absolute_import
-import importlib
-
 import six
 import varint
+
+from .codecs import LENGTH_PREFIXED_VAR_SIZE
+from .codecs import codec_by_name
 
 from .protocols import protocol_with_code
 from .protocols import protocol_with_name
 from .protocols import read_varint_code
 
-
-# These are special sizes
-LENGTH_PREFIXED_VAR_SIZE = -1
-
-
-class NoneCodec:
-	SIZE = 0
-	IS_PATH = False
-
-
-CODEC_CACHE = {}
-def find_codec_by_name(name):
-    if name is None:  # Special “do nothing – expect nothing” pseudo-codec
-        return NoneCodec
-    codec = CODEC_CACHE.get(name)
-    if not codec:
-        codec = CODEC_CACHE[name] = importlib.import_module(".codecs.{0}".format(name), __package__)
-    return codec
 
 
 def string_to_bytes(string):
@@ -77,7 +59,7 @@ def string_iter(string):
 		element = sp.pop(0)
 		proto = protocol_with_name(element)
 		try:
-			codec = find_codec_by_name(proto.codec)
+			codec = codec_by_name(proto.codec)
 		except ImportError as exc:
 			six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
 		value = None
@@ -101,7 +83,7 @@ def bytes_iter(buf):
 		code, num_bytes_read = read_varint_code(buf)
 		proto = protocol_with_code(code)
 		try:
-			codec = find_codec_by_name(proto.codec)
+			codec = codec_by_name(proto.codec)
 		except ImportError as exc:
 			six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
 		size, num_bytes_read2 = size_for_addr(codec, buf[num_bytes_read:])

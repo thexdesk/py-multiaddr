@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import idna
 
-from ..codec import LENGTH_PREFIXED_VAR_SIZE
+from . import LENGTH_PREFIXED_VAR_SIZE
 
 
 SIZE = LENGTH_PREFIXED_VAR_SIZE

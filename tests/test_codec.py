@@ -1,7 +1,8 @@
 # -*- encoding: utf-8 -*-
 import pytest
 
-from multiaddr.codec import find_codec_by_name
+from multiaddr.codecs import codec_by_name
+
 from multiaddr.codec import bytes_iter
 from multiaddr.codec import bytes_to_string
 from multiaddr.codec import size_for_addr
@@ -53,7 +54,7 @@ BYTES_MAP_STR_TEST_DATA = [
     ('p2p', b'\x40\x50\x60\x51', (64, 1)),
 ])
 def test_size_for_addr(codec_name, buf, expected):
-    assert size_for_addr(find_codec_by_name(codec_name), buf) == expected
+    assert size_for_addr(codec_by_name(codec_name), buf) == expected
 
 
 @pytest.mark.parametrize("buf, expected", [
@@ -70,13 +71,13 @@ def test_bytes_iter(buf, expected):
 
 @pytest.mark.parametrize("proto, buf, expected", ADDR_BYTES_MAP_STR_TEST_DATA)
 def test_codec_to_string(proto, buf, expected):
-    assert find_codec_by_name(proto.codec).to_string(proto, buf) == expected
+    assert codec_by_name(proto.codec).to_string(proto, buf) == expected
 
 
 @pytest.mark.parametrize("proto, expected, string",
                          ADDR_BYTES_MAP_STR_TEST_DATA)
 def test_codec_to_bytes(proto, string, expected):
-    assert find_codec_by_name(proto.codec).to_bytes(proto, string) == expected
+    assert codec_by_name(proto.codec).to_bytes(proto, string) == expected
 
 
 @pytest.mark.parametrize("string, buf", BYTES_MAP_STR_TEST_DATA)
@@ -143,7 +144,7 @@ def test_bytes_to_string_value_error(protocol_extension, bytes):
 ])
 def test_codec_to_bytes_value_error(proto, address):
     with pytest.raises(ValueError):
-        find_codec_by_name(proto.codec).to_bytes(proto, address)
+        codec_by_name(proto.codec).to_bytes(proto, address)
 
 
 @pytest.mark.parametrize("proto, buf", [
@@ -151,4 +152,4 @@ def test_codec_to_bytes_value_error(proto, address):
 ])
 def test_codec_to_string_value_error(proto, buf):
     with pytest.raises(ValueError):
-        find_codec_by_name(proto.codec).to_string(proto, buf)
+        codec_by_name(proto.codec).to_string(proto, buf)
