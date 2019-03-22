@@ -3,10 +3,10 @@ import pytest
 
 from multiaddr.codecs import codec_by_name
 
-from multiaddr.codec import bytes_iter
-from multiaddr.codec import bytes_to_string
-from multiaddr.codec import size_for_addr
-from multiaddr.codec import string_to_bytes
+from multiaddr.transforms import bytes_iter
+from multiaddr.transforms import bytes_to_string
+from multiaddr.transforms import size_for_addr
+from multiaddr.transforms import string_to_bytes
 
 import multiaddr.protocols
 from multiaddr.protocols import _codes_to_protocols

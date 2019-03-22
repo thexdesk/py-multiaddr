@@ -3,9 +3,9 @@ from copy import copy
 
 import six
 
-from .codec import bytes_iter
-from .codec import string_to_bytes
-from .codec import bytes_to_string
+from .transforms import bytes_iter
+from .transforms import string_to_bytes
+from .transforms import bytes_to_string
 
 
 class ProtocolNotFoundException(Exception):
