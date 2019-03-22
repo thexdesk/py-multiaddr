@@ -29,6 +29,8 @@ class Multiaddr(object):
     return new objects rather than modify internal state.
     """
 
+    __slots__ = ("_bytes",)
+
     def __init__(self, addr):
         """Instantiate a new Multiaddr.
 
