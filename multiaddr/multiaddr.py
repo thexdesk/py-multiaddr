@@ -3,12 +3,9 @@ from copy import copy
 
 import six
 
-from .codec import find_codec_by_name
-from .codec import size_for_addr
+from .codec import bytes_iter
 from .codec import string_to_bytes
 from .codec import bytes_to_string
-from .protocols import protocol_with_code
-from .protocols import read_varint_code
 
 
 class ProtocolNotFoundException(Exception):
@@ -89,20 +86,7 @@ class Multiaddr(object):
 
     def protocols(self):
         """Returns a list of Protocols this Multiaddr includes."""
-        buf = self.to_bytes()
-        protos = []
-        while buf:
-            code, num_bytes_read = read_varint_code(buf)
-            proto = protocol_with_code(code)
-            try:
-                codec = find_codec_by_name(proto.codec)
-            except ImportError as exc:
-                six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
-            protos.append(proto)
-            buf = buf[num_bytes_read:]
-            size = size_for_addr(codec, buf)
-            buf = buf[size:]
-        return protos
+        return list(proto for proto, _, _ in bytes_iter(self.to_bytes()))
 
     def encapsulate(self, other):
         """Wrap this Multiaddr around another.
@@ -136,24 +120,15 @@ class Multiaddr(object):
 
     def value_for_protocol(self, code):
         """Return the value (if any) following the specified protocol."""
-        from .util import split
-
         if not isinstance(code, int):
             raise ValueError("code type should be `int`, code={}".format(code))
 
-        for sub_addr in split(self):
-            protocol = sub_addr.protocols()[0]
-            if protocol.code == code:
-                # e.g. if `sub_addr=/unix/123`, then `addr_parts=['', 'unix', '123']`
-                addr_parts = str(sub_addr).split("/")
-                if protocol.path:
-                    return "/" + "/".join(addr_parts[2:])
-                if len(addr_parts) > 3:
-                    raise ValueError("Unknown Protocol format")
-                elif len(addr_parts) == 3:
+        for proto, codec, part in bytes_iter(self.to_bytes()):
+            if proto.code == code:
+                if codec.SIZE != 0:
                     # If we have an address, return it
-                    return addr_parts[2]
-                elif len(addr_parts) == 2:
+                    return codec.to_string(proto, part)
+                else:
                     # We were given something like '/utp', which doesn't have
                     # an address, so return ''
                     return ''

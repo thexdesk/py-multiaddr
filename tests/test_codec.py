@@ -2,7 +2,7 @@
 import pytest
 
 from multiaddr.codec import find_codec_by_name
-from multiaddr.codec import bytes_split
+from multiaddr.codec import bytes_iter
 from multiaddr.codec import bytes_to_string
 from multiaddr.codec import size_for_addr
 from multiaddr.codec import string_to_bytes
@@ -59,13 +59,13 @@ def test_size_for_addr(codec_name, buf, expected):
 @pytest.mark.parametrize("buf, expected", [
     # "/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321"
     (b'\x04\x7f\x00\x00\x01\x91\x02\x04\xd2\x04\x7f\x00\x00\x01\x06\x10\xe1',
-     [b'\x04\x7f\x00\x00\x01',
-      b'\x91\x02\04\xd2',
-      b'\x04\x7f\x00\x00\x01',
-      b'\x06\x10\xe1']),
+     [(_names_to_protocols["ip4"], b'\x7f\x00\x00\x01'),
+      (_names_to_protocols["udp"], b'\x04\xd2'),
+      (_names_to_protocols["ip4"], b'\x7f\x00\x00\x01'),
+      (_names_to_protocols["tcp"], b'\x10\xe1')]),
 ])
-def test_bytes_split(buf, expected):
-    assert bytes_split(buf) == expected
+def test_bytes_iter(buf, expected):
+    assert list((proto, val) for proto, _, val in bytes_iter(buf)) == expected
 
 
 @pytest.mark.parametrize("proto, buf, expected", ADDR_BYTES_MAP_STR_TEST_DATA)

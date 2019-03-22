@@ -32,55 +32,26 @@ def find_codec_by_name(name):
 def string_to_bytes(string):
     if not string:
         return b''
-    # consume trailing slashes
-    if not string.startswith('/'):
-        raise ValueError("invalid multiaddr, must begin with /")
-    string = string.rstrip('/')
-    sp = string.split('/')
 
-    # skip the first element, since it starts with /
-    sp.pop(0)
     bs = []
-    while sp:
-        element = sp.pop(0)
-        proto = protocol_with_name(element)
+    for proto, codec, value in string_iter(string):
         bs.append(varint.encode(proto.code))
-        try:
-            codec = find_codec_by_name(proto.codec)
-        except ImportError as exc:
-            six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
-        if codec.SIZE == 0:
-            continue
-        if len(sp) < 1:
-            raise ValueError(
-                "protocol requires address, none given: %s" % proto.name)
-        if codec.IS_PATH:
-            sp = ["/" + "/".join(sp)]
-        bs.append(codec.to_bytes(proto, sp.pop(0)))
+        if value is not None:
+            bs.append(codec.to_bytes(proto, value))
     return b''.join(bs)
 
 
 def bytes_to_string(buf):
-    st = ['']  # start with empty string so we get a leading slash on join()
-    while buf:
-        maddr_component = ""
-        code, num_bytes_read = read_varint_code(buf)
-        buf = buf[num_bytes_read:]
-        proto = protocol_with_code(code)
-        maddr_component += proto.name
-        try:
-            codec = find_codec_by_name(proto.codec)
-        except ImportError as exc:
-            six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
-        size = size_for_addr(codec, buf)
-        if size > 0:
-            addr = codec.to_string(proto, buf[:size])
-            if not (codec.IS_PATH and addr[0] == '/'):
-                maddr_component += '/'
-            maddr_component += addr
-        st.append(maddr_component)
-        buf = buf[size:]
-    return '/'.join(st)
+	st = [u'']  # start with empty string so we get a leading slash on join()
+	for proto, codec, part in bytes_iter(buf):
+		st.append(proto.name)
+		if codec.SIZE != 0:
+			value = codec.to_string(proto, part)
+			if codec.IS_PATH and value[0] == u'/':
+				st.append(value[1:])
+			else:
+				st.append(value)
+	return u'/'.join(st)
 
 
 def size_for_addr(codec, buf):
@@ -91,17 +62,47 @@ def size_for_addr(codec, buf):
         return size + num_bytes_read
 
 
-def bytes_split(buf):
-    ret = []
-    while buf:
-        code, num_bytes_read = read_varint_code(buf)
-        proto = protocol_with_code(code)
-        try:
-            codec = find_codec_by_name(proto.codec)
-        except ImportError as exc:
-            six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
-        size = size_for_addr(codec, buf[num_bytes_read:])
-        length = size + num_bytes_read
-        ret.append(buf[:length])
-        buf = buf[length:]
-    return ret
+def string_iter(string):
+	if not string.startswith(u'/'):
+		raise ValueError("invalid multiaddr, must begin with /")
+	# consume trailing slashes
+	string = string.rstrip(u'/')
+	sp = string.split(u'/')
+
+	# skip the first element, since it starts with /
+	sp.pop(0)
+	while sp:
+		element = sp.pop(0)
+		proto = protocol_with_name(element)
+		try:
+			codec = find_codec_by_name(proto.codec)
+		except ImportError as exc:
+			six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
+		value = None
+		if codec.SIZE != 0:
+			if len(sp) < 1:
+				raise ValueError(
+					"protocol requires address, none given: %s" % proto.name)
+			if codec.IS_PATH:
+				value = "/" + "/".join(sp)
+				if not six.PY2:
+					sp.clear()
+				else:
+					sp = []
+			else:
+				value = sp.pop(0)
+		yield proto, codec, value
+
+
+def bytes_iter(buf):
+	while buf:
+		code, num_bytes_read = read_varint_code(buf)
+		proto = protocol_with_code(code)
+		try:
+			codec = find_codec_by_name(proto.codec)
+		except ImportError as exc:
+			six.raise_from(ValueError("failed to parse %s addr: unknown" % proto.name), exc)
+		size = size_for_addr(codec, buf[num_bytes_read:])
+		length = size + num_bytes_read
+		yield proto, codec, buf[num_bytes_read:length]
+		buf = buf[length:]

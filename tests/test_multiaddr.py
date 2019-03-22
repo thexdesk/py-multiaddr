@@ -16,8 +16,6 @@ from multiaddr.protocols import P_UTP
 from multiaddr.protocols import P_TCP
 from multiaddr.protocols import P_UDP
 from multiaddr.protocols import P_UNIX
-from multiaddr.util import split
-from multiaddr.util import join
 
 
 @pytest.mark.parametrize(
@@ -115,23 +113,6 @@ def test_eq():
     assert m4 == m2
     assert m3 == m4
     assert m4 == m3
-
-
-@pytest.mark.parametrize(
-    'test_vals',
-    [("/ip4/1.2.3.4/udp/1234", ["/ip4/1.2.3.4", "/udp/1234"]),
-     ("/ip4/1.2.3.4/tcp/1/ip4/2.3.4.5/udp/2",
-      ["/ip4/1.2.3.4", "/tcp/1", "/ip4/2.3.4.5", "/udp/2"]),
-     ("/ip4/1.2.3.4/utp/ip4/2.3.4.5/udp/2/udt",
-      ["/ip4/1.2.3.4", "/utp", "/ip4/2.3.4.5", "/udp/2", "/udt"])])
-def test_bytes_split_and_join(test_vals):
-    string, expected = test_vals
-    mm = Multiaddr(string)
-    split_m = split(mm)
-    for i, addr in enumerate(split_m):
-        assert str(addr) == expected[i]
-    joined = join(split_m)
-    assert mm == joined
 
 
 def test_protocols():
@@ -244,21 +225,6 @@ def test_bad_initialization_too_many_params():
 def test_bad_initialization_wrong_type():
     with pytest.raises(ValueError):
         Multiaddr(42)
-
-
-def test_get_value_too_many_fields_protocol(monkeypatch):
-    """
-    This test patches the Multiaddr's string representation to return
-    an invalid string in order to test that value_for_protocol properly
-    throws a ValueError.  This avoids some of the error checking in
-    the constructor and is easier to patch, thus the actual values
-    that the constructor specifies is ignored by the test.
-    """
-    monkeypatch.setattr("multiaddr.multiaddr.Multiaddr.__str__",
-                        lambda ignore: str('/udp/1234/5678'))
-    a = Multiaddr("/ip4/127.0.0.1/udp/1234")
-    with pytest.raises(ValueError):
-        a.value_for_protocol(P_UDP)
 
 
 def test_value_for_protocol_argument_wrong_type():
