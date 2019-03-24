@@ -1,11 +1,12 @@
 # -*- encoding: utf-8 -*-
 import pytest
 
-from multiaddr.codec import find_codec_by_name
-from multiaddr.codec import bytes_split
-from multiaddr.codec import bytes_to_string
-from multiaddr.codec import size_for_addr
-from multiaddr.codec import string_to_bytes
+from multiaddr.codecs import codec_by_name
+
+from multiaddr.transforms import bytes_iter
+from multiaddr.transforms import bytes_to_string
+from multiaddr.transforms import size_for_addr
+from multiaddr.transforms import string_to_bytes
 
 import multiaddr.protocols
 from multiaddr.protocols import _codes_to_protocols
@@ -26,16 +27,16 @@ ADDR_BYTES_MAP_STR_TEST_DATA = [
      b'\x9a\x18\x08\x73\x06\x36\x90\x43\x09\x1f\x04\xd2',
      'timaq4ygg2iegci7:1234'),
     (_names_to_protocols['p2p'],
-     b'\x22\x12\x20\xd5\x2e\xbb\x89\xd8\x5b\x02\xa2\x84\x94\x82\x03\xa6\x2f\xf2'
+     b'\x12\x20\xd5\x2e\xbb\x89\xd8\x5b\x02\xa2\x84\x94\x82\x03\xa6\x2f\xf2'
      b'\x83\x89\xc5\x7c\x9f\x42\xbe\xec\x4e\xc2\x0d\xb7\x6a\x68\x91\x1c\x0b',
      'QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC'),
 
 # Additional test data
     (_names_to_protocols['dns4'],
-     b'\x30xn--4gbrim.xn----ymcbaaajlc6dj7bxne2c.xn--wgbh1c',
+     b'xn--4gbrim.xn----ymcbaaajlc6dj7bxne2c.xn--wgbh1c',
      u'موقع.وزارة-الاتصالات.مصر'),  # Explicietly mark this as unicode to force the text to be LTR in editors
     (_names_to_protocols['dns4'],
-     b'\x16xn--fuball-cta.example',
+     b'xn--fuball-cta.example',
      u'fußball.example'),  # This will fail if IDNA-2003/NamePrep is used
 ]
 
@@ -47,36 +48,36 @@ BYTES_MAP_STR_TEST_DATA = [
 ]
 
 
-@pytest.mark.parametrize("proto, buf, expected", [
-    (_names_to_protocols['https'], b'\x01\x02\x03', 0),
-    (_names_to_protocols['ip4'], b'\x01\x02\x03', 4),
-    (_names_to_protocols['p2p'], b'\x40\x50\x60\x51', 65),
+@pytest.mark.parametrize("codec_name, buf, expected", [
+    (None, b'\x01\x02\x03', (0, 0)),
+    ('ip4', b'\x01\x02\x03', (4, 0)),
+    ('p2p', b'\x40\x50\x60\x51', (64, 1)),
 ])
-def test_size_for_addr(proto, buf, expected):
-    assert size_for_addr(proto, buf) == expected
+def test_size_for_addr(codec_name, buf, expected):
+    assert size_for_addr(codec_by_name(codec_name), buf) == expected
 
 
 @pytest.mark.parametrize("buf, expected", [
     # "/ip4/127.0.0.1/udp/1234/ip4/127.0.0.1/tcp/4321"
     (b'\x04\x7f\x00\x00\x01\x91\x02\x04\xd2\x04\x7f\x00\x00\x01\x06\x10\xe1',
-     [b'\x04\x7f\x00\x00\x01',
-      b'\x91\x02\04\xd2',
-      b'\x04\x7f\x00\x00\x01',
-      b'\x06\x10\xe1']),
+     [(_names_to_protocols["ip4"], b'\x7f\x00\x00\x01'),
+      (_names_to_protocols["udp"], b'\x04\xd2'),
+      (_names_to_protocols["ip4"], b'\x7f\x00\x00\x01'),
+      (_names_to_protocols["tcp"], b'\x10\xe1')]),
 ])
-def test_bytes_split(buf, expected):
-    assert bytes_split(buf) == expected
+def test_bytes_iter(buf, expected):
+    assert list((proto, val) for proto, _, val in bytes_iter(buf)) == expected
 
 
 @pytest.mark.parametrize("proto, buf, expected", ADDR_BYTES_MAP_STR_TEST_DATA)
 def test_codec_to_string(proto, buf, expected):
-    assert find_codec_by_name(proto.codec).to_string(proto, buf) == expected
+    assert codec_by_name(proto.codec).to_string(proto, buf) == expected
 
 
 @pytest.mark.parametrize("proto, expected, string",
                          ADDR_BYTES_MAP_STR_TEST_DATA)
 def test_codec_to_bytes(proto, string, expected):
-    assert find_codec_by_name(proto.codec).to_bytes(proto, string) == expected
+    assert codec_by_name(proto.codec).to_bytes(proto, string) == expected
 
 
 @pytest.mark.parametrize("string, buf", BYTES_MAP_STR_TEST_DATA)
@@ -90,18 +91,15 @@ def test_bytes_to_string(string, buf):
 
 
 class DummyProtocol(Protocol):
-    def __init__(self, code, size, name, vcode, codec=None, path=False):
+    def __init__(self, code, name, codec=None):
         self.code = code
-        self.size = size
         self.name = name
-        self.vcode = vcode
         self.codec = codec
-        self.path = path
 
 
 class UnparsableProtocol(DummyProtocol):
 	def __init__(self):
-		super(UnparsableProtocol, self).__init__(333, 16, "unparsable", b"\xcd\x02")
+		super(UnparsableProtocol, self).__init__(333, "unparsable", "?")
 
 
 @pytest.fixture
@@ -133,7 +131,6 @@ def test_bytes_to_string_value_error(protocol_extension, bytes):
 
 
 @pytest.mark.parametrize("proto, address", [
-    (DummyProtocol(234, 32, 'test', b'123'), '1.2.3.4'),
     (_names_to_protocols['ip4'], '1124.2.3'),
     (_names_to_protocols['ip6'], '123.123.123.123'),
     (_names_to_protocols['tcp'], 'a'),
@@ -147,14 +144,12 @@ def test_bytes_to_string_value_error(protocol_extension, bytes):
 ])
 def test_codec_to_bytes_value_error(proto, address):
     with pytest.raises(ValueError):
-        find_codec_by_name(proto.codec).to_bytes(proto, address)
+        codec_by_name(proto.codec).to_bytes(proto, address)
 
 
 @pytest.mark.parametrize("proto, buf", [
-    (DummyProtocol(234, 32, 'test', b'123'), b'\x0a\x0b\x0c\x0d'),
-    (_names_to_protocols['p2p'], b'\x15\x23\x0d\x52\xeb\xb8\x9d\x85\xb0\x2a\x28\x49\x48\x20\x3a'),
     (_names_to_protocols['tcp'], b'\xff\xff\xff\xff')
 ])
 def test_codec_to_string_value_error(proto, buf):
     with pytest.raises(ValueError):
-        find_codec_by_name(proto.codec).to_string(proto, buf)
+        codec_by_name(proto.codec).to_string(proto, buf)

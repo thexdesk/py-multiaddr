@@ -4,6 +4,10 @@ import struct
 import six
 
 
+SIZE = 16
+IS_PATH = False
+
+
 def to_bytes(proto, string):
 	try:
 		return struct.pack('>H', int(string, 10))

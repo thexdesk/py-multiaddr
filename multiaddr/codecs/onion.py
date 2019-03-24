@@ -5,6 +5,10 @@ import struct
 import six
 
 
+SIZE = 96
+IS_PATH = False
+
+
 def to_bytes(proto, string):
 	addr = string.split(":")
 	if len(addr) != 2:

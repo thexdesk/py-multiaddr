@@ -3,7 +3,11 @@ from __future__ import absolute_import
 import netaddr
 import six
 
-from ..util import packed_net_bytes_to_int
+from ._util import packed_net_bytes_to_int
+
+
+SIZE = 128
+IS_PATH = False
 
 
 def to_bytes(proto, string):

@@ -2,9 +2,12 @@ from __future__ import absolute_import
 import os
 
 import six
-import varint
 
-from ..protocols import read_varint_code
+from . import LENGTH_PREFIXED_VAR_SIZE
+
+
+SIZE = LENGTH_PREFIXED_VAR_SIZE
+IS_PATH = True
 
 
 if hasattr(os, "fsencode") and hasattr(os, "fsdecode"):
@@ -25,11 +28,8 @@ else:  # PY2
 
 
 def to_bytes(proto, string):
-	bytes = fsencode(string)
-	size = varint.encode(len(bytes))
-	return b''.join([size, bytes])
+	return fsencode(string)
 
 
 def to_string(proto, buf):
-	size, num_bytes_read = read_varint_code(buf)
-	return fsdecode(buf[num_bytes_read:])
+	return fsdecode(buf)
