@@ -3,6 +3,9 @@ import pytest
 
 from multiaddr.codecs import codec_by_name
 
+from multiaddr.exceptions import StringParseError
+from multiaddr.exceptions import BinaryParseError
+
 from multiaddr.transforms import bytes_iter
 from multiaddr.transforms import bytes_to_string
 from multiaddr.transforms import size_for_addr
@@ -118,15 +121,16 @@ def protocol_extension(monkeypatch):
 	'/unparsable/5'
 ])
 def test_string_to_bytes_value_error(protocol_extension, string):
-	with pytest.raises(ValueError):
+	with pytest.raises(StringParseError):
 		string_to_bytes(string)
 
 
 @pytest.mark.parametrize("bytes", [
-	b'\xcd\x02\x0c\x0d'
+	b'\xcd\x02\x0c\x0d',
+	b"\x35\x03a:b"
 ])
 def test_bytes_to_string_value_error(protocol_extension, bytes):
-	with pytest.raises(ValueError):
+	with pytest.raises(BinaryParseError):
 		bytes_to_string(bytes)
 
 
@@ -143,7 +147,9 @@ def test_bytes_to_string_value_error(protocol_extension, bytes):
     (_names_to_protocols['p2p'], '15230d52ebb89d85b02a284948203a'),
 ])
 def test_codec_to_bytes_value_error(proto, address):
-    with pytest.raises(ValueError):
+	# Codecs themselves may raise any exception type – it will then be converted
+	# to `StringParseError` by a higher level
+    with pytest.raises(Exception):
         codec_by_name(proto.codec).to_bytes(proto, address)
 
 
@@ -151,5 +157,7 @@ def test_codec_to_bytes_value_error(proto, address):
     (_names_to_protocols['tcp'], b'\xff\xff\xff\xff')
 ])
 def test_codec_to_string_value_error(proto, buf):
-    with pytest.raises(ValueError):
+	# Codecs themselves may raise any exception type – it will then be converted
+	# to `BinaryParseError` by a higher level
+    with pytest.raises(Exception):
         codec_by_name(proto.codec).to_string(proto, buf)

@@ -12,34 +12,23 @@ IS_PATH = False
 def to_bytes(proto, string):
 	addr = string.split(":")
 	if len(addr) != 2:
-		raise ValueError(
-		    "failed to parse %s addr: %s does not contain a port number."
-		    % (proto.name, string))
+		raise ValueError("Does not contain a port number")
 
 	# onion address without the ".onion" substring
 	if len(addr[0]) != 16:
-		raise ValueError(
-		    "failed to parse %s addr: %s not a Tor onion address."
-		    % (proto.name, string))
+		raise ValueError("Invalid onion host address length (must be 16 characters)")
 	try:
 		onion_host_bytes = base64.b32decode(addr[0].upper())
-	except Exception as ex:
-		raise ValueError(
-		    "failed to decode base32 %s addr: %s %s"
-		    % (proto.name, string, str(ex)))
+	except Exception as exc:
+		six.raise_from(ValueError("Cannot decode {0!r} as base32: {1}".format(addr[0], exc)), exc)
 
 	# onion port number
 	try:
-		port = int(addr[1])
-	except Exception as ex:
-		raise ValueError("failed to parse %s addr: %s"
-		                 % (proto.name, str(ex)))
-	if port >= 65536:
-		raise ValueError("failed to parse %s addr: %s"
-		                 % (proto.name, "port greater than 65536"))
-	if port < 1:
-		raise ValueError("failed to parse %s addr: %s"
-		                 % (proto.name, "port less than 1"))
+		port = int(addr[1], 10)
+	except ValueError as exc:
+		six.raise_from(ValueError("Port number is not an integer"), exc)
+	if port not in range(1, 65536):
+		raise ValueError("Port number is not in range(1, 65536)")
 
 	return b''.join((onion_host_bytes, struct.pack('>H', port)))
 

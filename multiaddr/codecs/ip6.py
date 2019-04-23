@@ -11,10 +11,7 @@ IS_PATH = False
 
 
 def to_bytes(proto, string):
-	try:
-		return netaddr.IPAddress(string, version=6).packed
-	except Exception:
-		raise ValueError("failed to parse ip4 addr: %s" % string)
+	return netaddr.IPAddress(string, version=6).packed
 
 
 def to_string(proto, buf):
