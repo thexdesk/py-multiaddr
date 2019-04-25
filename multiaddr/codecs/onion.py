@@ -26,7 +26,7 @@ def to_bytes(proto, string):
 	try:
 		port = int(addr[1], 10)
 	except ValueError as exc:
-		six.raise_from(ValueError("Port number is not an integer"), exc)
+		six.raise_from(ValueError("Port number is not a base 10 integer"), exc)
 	if port not in range(1, 65536):
 		raise ValueError("Port number is not in range(1, 65536)")
 

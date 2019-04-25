@@ -16,7 +16,7 @@ class Multiaddr(object):
     Multiaddr is a cross-protocol, cross-platform format for representing
     internet addresses. It emphasizes explicitness and self-description.
 
-    Learn more here: http://multiformats.io/multiaddr/
+    Learn more here: https://multiformats.io/multiaddr/
 
     Multiaddrs have both a binary and string representation.
 

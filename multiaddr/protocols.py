@@ -83,10 +83,6 @@ class Protocol(object):
         if not isinstance(codec, six.string_types) and not codec is None:
             raise TypeError("codec must be a string or None")
 
-        #XXX: Why does this exist!?
-        if code not in _CODES and code != 0:
-            raise exceptions.ProtocolNotFoundError(code, "code")
-
         self.code = code
         self.name = name
         self.codec = codec

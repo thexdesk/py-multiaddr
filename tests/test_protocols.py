@@ -38,13 +38,6 @@ def test_invalid_code(valid_params, invalid_code):
 	with pytest.raises(TypeError):
 		protocols.Protocol(**valid_params)
 
-@pytest.mark.parametrize("unknown_code", [123])
-def test_unknown_code(valid_params, unknown_code):
-	assert unknown_code not in protocols._CODES
-	valid_params['code'] = unknown_code
-	with pytest.raises(exceptions.ProtocolNotFoundError):
-		protocols.Protocol(**valid_params)
-
 
 @pytest.mark.parametrize("invalid_name", [123, 1.0])
 def test_invalid_name(valid_params, invalid_name):
