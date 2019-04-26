@@ -175,41 +175,41 @@ _codes_to_protocols = dict((proto.code, proto) for proto in PROTOCOLS)
 
 
 def add_protocol(proto):
-	if proto.name in _names_to_protocols:
-		raise exceptions.ProtocolExistsError(proto, "name")
+    if proto.name in _names_to_protocols:
+        raise exceptions.ProtocolExistsError(proto, "name")
 
-	if proto.code in _codes_to_protocols:
-		raise exceptions.ProtocolExistsError(proto, "code")
+    if proto.code in _codes_to_protocols:
+        raise exceptions.ProtocolExistsError(proto, "code")
 
-	PROTOCOLS.append(proto)
-	_names_to_protocols[proto.name] = proto
-	_codes_to_protocols[proto.code] = proto
-	return None
+    PROTOCOLS.append(proto)
+    _names_to_protocols[proto.name] = proto
+    _codes_to_protocols[proto.code] = proto
+    return None
 
 
 def protocol_with_name(name):
-	name = str(name)  # PY2: Convert Unicode strings to native/binary representation
-	if name not in _names_to_protocols:
-		raise exceptions.ProtocolNotFoundError(name, "name")
-	return _names_to_protocols[name]
+    name = str(name)  # PY2: Convert Unicode strings to native/binary representation
+    if name not in _names_to_protocols:
+        raise exceptions.ProtocolNotFoundError(name, "name")
+    return _names_to_protocols[name]
 
 
 def protocol_with_code(code):
-	if code not in _codes_to_protocols:
-		raise exceptions.ProtocolNotFoundError(code, "code")
-	return _codes_to_protocols[code]
+    if code not in _codes_to_protocols:
+        raise exceptions.ProtocolNotFoundError(code, "code")
+    return _codes_to_protocols[code]
 
 
 def protocols_with_string(string):
-	"""Return a list of protocols matching given string."""
-	# Normalize string
-	while "//" in string:
-		string = string.replace("//", "/")
-	string = string.strip("/")
-	if not string:
-		return []
+    """Return a list of protocols matching given string."""
+    # Normalize string
+    while "//" in string:
+        string = string.replace("//", "/")
+    string = string.strip("/")
+    if not string:
+        return []
 
-	ret = []
-	for name in string.split("/"):
-		ret.append(protocol_with_name(name))
-	return ret
+    ret = []
+    for name in string.split("/"):
+        ret.append(protocol_with_name(name))
+    return ret

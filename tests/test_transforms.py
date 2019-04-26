@@ -101,37 +101,37 @@ class DummyProtocol(Protocol):
 
 
 class UnparsableProtocol(DummyProtocol):
-	def __init__(self):
-		super(UnparsableProtocol, self).__init__(333, "unparsable", "?")
+    def __init__(self):
+        super(UnparsableProtocol, self).__init__(333, "unparsable", "?")
 
 
 @pytest.fixture
 def protocol_extension(monkeypatch):
-	# “Add” additional non-parsable protocol to protocols from code list
-	names_to_protocols = _names_to_protocols.copy()
-	codes_to_protocols = _codes_to_protocols.copy()
-	names_to_protocols["unparsable"] = codes_to_protocols[333] = UnparsableProtocol()
-	monkeypatch.setattr(multiaddr.protocols, "_names_to_protocols", names_to_protocols)
-	monkeypatch.setattr(multiaddr.protocols, "_codes_to_protocols", codes_to_protocols)
+    # “Add” additional non-parsable protocol to protocols from code list
+    names_to_protocols = _names_to_protocols.copy()
+    codes_to_protocols = _codes_to_protocols.copy()
+    names_to_protocols["unparsable"] = codes_to_protocols[333] = UnparsableProtocol()
+    monkeypatch.setattr(multiaddr.protocols, "_names_to_protocols", names_to_protocols)
+    monkeypatch.setattr(multiaddr.protocols, "_codes_to_protocols", codes_to_protocols)
 
 
 @pytest.mark.parametrize("string", [
-	'test',
-	'/ip4/',
-	'/unparsable/5'
+    'test',
+    '/ip4/',
+    '/unparsable/5'
 ])
 def test_string_to_bytes_value_error(protocol_extension, string):
-	with pytest.raises(StringParseError):
-		string_to_bytes(string)
+    with pytest.raises(StringParseError):
+        string_to_bytes(string)
 
 
 @pytest.mark.parametrize("bytes", [
-	b'\xcd\x02\x0c\x0d',
-	b"\x35\x03a:b"
+    b'\xcd\x02\x0c\x0d',
+    b"\x35\x03a:b"
 ])
 def test_bytes_to_string_value_error(protocol_extension, bytes):
-	with pytest.raises(BinaryParseError):
-		bytes_to_string(bytes)
+    with pytest.raises(BinaryParseError):
+        bytes_to_string(bytes)
 
 
 @pytest.mark.parametrize("proto, address", [
@@ -147,8 +147,8 @@ def test_bytes_to_string_value_error(protocol_extension, bytes):
     (_names_to_protocols['p2p'], '15230d52ebb89d85b02a284948203a'),
 ])
 def test_codec_to_bytes_value_error(proto, address):
-	# Codecs themselves may raise any exception type – it will then be converted
-	# to `StringParseError` by a higher level
+    # Codecs themselves may raise any exception type – it will then be converted
+    # to `StringParseError` by a higher level
     with pytest.raises(Exception):
         codec_by_name(proto.codec).to_bytes(proto, address)
 
@@ -157,7 +157,7 @@ def test_codec_to_bytes_value_error(proto, address):
     (_names_to_protocols['tcp'], b'\xff\xff\xff\xff')
 ])
 def test_codec_to_string_value_error(proto, buf):
-	# Codecs themselves may raise any exception type – it will then be converted
-	# to `BinaryParseError` by a higher level
+    # Codecs themselves may raise any exception type – it will then be converted
+    # to `BinaryParseError` by a higher level
     with pytest.raises(Exception):
         codec_by_name(proto.codec).to_string(proto, buf)

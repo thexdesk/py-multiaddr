@@ -8,8 +8,8 @@ LENGTH_PREFIXED_VAR_SIZE = -1
 
 
 class NoneCodec:
-	SIZE = 0
-	IS_PATH = False
+    SIZE = 0
+    IS_PATH = False
 
 
 CODEC_CACHE = {}

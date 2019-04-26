@@ -10,8 +10,8 @@ IS_PATH = False
 
 
 def to_bytes(proto, string):
-	return idna.encode(string, uts46=True)
+    return idna.encode(string, uts46=True)
 
 
 def to_string(proto, buf):
-	return idna.decode(buf)
+    return idna.decode(buf)

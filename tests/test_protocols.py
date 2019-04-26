@@ -34,9 +34,9 @@ def test_valid(valid_params):
 
 @pytest.mark.parametrize("invalid_code", ['abc'])
 def test_invalid_code(valid_params, invalid_code):
-	valid_params['code'] = invalid_code
-	with pytest.raises(TypeError):
-		protocols.Protocol(**valid_params)
+    valid_params['code'] = invalid_code
+    with pytest.raises(TypeError):
+        protocols.Protocol(**valid_params)
 
 
 @pytest.mark.parametrize("invalid_name", [123, 1.0])

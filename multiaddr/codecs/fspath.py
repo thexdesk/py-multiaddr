@@ -28,8 +28,8 @@ else:  # PY2
 
 
 def to_bytes(proto, string):
-	return fsencode(string)
+    return fsencode(string)
 
 
 def to_string(proto, buf):
-	return fsdecode(buf)
+    return fsdecode(buf)
