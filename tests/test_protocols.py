@@ -2,7 +2,7 @@ import six
 import pytest
 import varint
 
-from multiaddr import protocols
+from multiaddr import exceptions, protocols
 
 
 def test_code_to_varint():
@@ -32,26 +32,25 @@ def test_valid(valid_params):
         assert getattr(proto, key) == valid_params[key]
 
 
-@pytest.mark.parametrize("invalid_code", [123, 'abc'])
+@pytest.mark.parametrize("invalid_code", ['abc'])
 def test_invalid_code(valid_params, invalid_code):
-    assert invalid_code not in protocols._CODES
     valid_params['code'] = invalid_code
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         protocols.Protocol(**valid_params)
 
 
 @pytest.mark.parametrize("invalid_name", [123, 1.0])
 def test_invalid_name(valid_params, invalid_name):
     valid_params['name'] = invalid_name
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         protocols.Protocol(**valid_params)
 
 
-@pytest.mark.skipif(six.PY2, reason="Binary string are allowed on Python 2")
+@pytest.mark.skipif(six.PY2, reason="Binary strings are allowed on Python 2")
 @pytest.mark.parametrize("invalid_codec", [b"ip4", 123, 0.123])
 def test_invalid_codec(valid_params, invalid_codec):
     valid_params['codec'] = invalid_codec
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         protocols.Protocol(**valid_params)
 
 
@@ -71,8 +70,10 @@ def test_protocol_with_name():
     proto = protocols.protocol_with_name('ip4')
     assert proto.name == 'ip4'
     assert proto.code == protocols.P_IP4
+    assert proto.size == 32
+    assert proto.vcode == varint.encode(protocols.P_IP4)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(exceptions.ProtocolNotFoundError):
         proto = protocols.protocol_with_name('foo')
 
 
@@ -80,8 +81,10 @@ def test_protocol_with_code():
     proto = protocols.protocol_with_code(protocols.P_IP4)
     assert proto.name == 'ip4'
     assert proto.code == protocols.P_IP4
+    assert proto.size == 32
+    assert proto.vcode == varint.encode(protocols.P_IP4)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(exceptions.ProtocolNotFoundError):
         proto = protocols.protocol_with_code(1234)
 
 
@@ -114,7 +117,7 @@ def test_protocols_with_string_mixed():
     names = ['ip4']
     ins = "/".join(names)
     test_protocols_with_string(names)
-    with pytest.raises(ValueError):
+    with pytest.raises(exceptions.ProtocolNotFoundError):
         names.append("foo")
         ins = "/".join(names)
         protocols.protocols_with_string(ins)
@@ -141,10 +144,10 @@ def test_add_protocol(patch_protocols, valid_params):
 def test_add_protocol_twice(patch_protocols, valid_params):
     proto = protocols.Protocol(**valid_params)
     protocols.add_protocol(proto)
-    with pytest.raises(ValueError):
+    with pytest.raises(exceptions.ProtocolExistsError):
         protocols.add_protocol(proto)
     del protocols._names_to_protocols[proto.name]
-    with pytest.raises(ValueError):
+    with pytest.raises(exceptions.ProtocolExistsError):
         protocols.add_protocol(proto)
     del protocols._codes_to_protocols[proto.code]
     protocols.add_protocol(proto)
@@ -160,7 +163,7 @@ def test_protocol_repr():
     b'\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x01',
     b'\x90\x91\x92\x93\x94\x95\x96\x97\x98\x02'])
 def test_overflowing_varint(buf):
-    with pytest.raises(ValueError):
+    with pytest.raises(OverflowError):
         protocols.read_varint_code(buf)
 
 

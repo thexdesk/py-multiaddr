@@ -3,6 +3,7 @@ import binascii
 import six
 import varint
 
+from . import exceptions
 from .codecs import codec_by_name
 
 
@@ -76,14 +77,11 @@ class Protocol(object):
 
     def __init__(self, code, name, codec):
         if not isinstance(code, six.integer_types):
-            raise ValueError("code must be an integer")
+            raise TypeError("code must be an integer")
         if not isinstance(name, six.string_types):
-            raise ValueError("name must be a string")
+            raise TypeError("name must be a string")
         if not isinstance(codec, six.string_types) and not codec is None:
-            raise ValueError("codec must be a string or None")
-
-        if code not in _CODES and code != 0:
-            raise ValueError("Invalid code '%d'" % code)
+            raise TypeError("codec must be a string or None")
 
         self.code = code
         self.name = name
@@ -129,7 +127,9 @@ def _uvarint(buf):
             b = int(binascii.b2a_hex(b_str), 16)
         if b < 0x80:
             if i > 9 or (i == 9 and b > 1):
-                raise ValueError("Overflow")
+                # Code 34 apparently means `OverflowError`
+                # (as opposed to other `ArithmeticError` types)
+                raise OverflowError(34, "UVarInt too large")
             return (x | b << s, i + 1)
         x |= (b & 0x7f) << s
         s += 7
@@ -176,11 +176,10 @@ _codes_to_protocols = dict((proto.code, proto) for proto in PROTOCOLS)
 
 def add_protocol(proto):
     if proto.name in _names_to_protocols:
-        raise ValueError("protocol by the name %s already exists" % proto.name)
+        raise exceptions.ProtocolExistsError(proto, "name")
 
     if proto.code in _codes_to_protocols:
-        raise ValueError("protocol code %d already taken by %s" %
-                         (proto.code, _codes_to_protocols[proto.code].name))
+        raise exceptions.ProtocolExistsError(proto, "code")
 
     PROTOCOLS.append(proto)
     _names_to_protocols[proto.name] = proto
@@ -189,32 +188,28 @@ def add_protocol(proto):
 
 
 def protocol_with_name(name):
+    name = str(name)  # PY2: Convert Unicode strings to native/binary representation
     if name not in _names_to_protocols:
-        raise ValueError("No protocol with name %s" % name)
+        raise exceptions.ProtocolNotFoundError(name, "name")
     return _names_to_protocols[name]
 
 
 def protocol_with_code(code):
     if code not in _codes_to_protocols:
-        raise ValueError("No protocol with code %s" % code)
+        raise exceptions.ProtocolNotFoundError(code, "code")
     return _codes_to_protocols[code]
 
 
 def protocols_with_string(string):
     """Return a list of protocols matching given string."""
+    # Normalize string
+    while "//" in string:
+        string = string.replace("//", "/")
+    string = string.strip("/")
     if not string:
         return []
 
-    s = string.strip("/")
-    sp = s.split("/")
-    if not sp or len(sp) == 0 or sp == ['']:
-        return []
-
     ret = []
-    for name in sp:
-        try:
-            proto = protocol_with_name(name)
-        except ValueError:
-            raise ValueError("No Protocol with name %s" % name)
-        ret.append(proto)
+    for name in string.split("/"):
+        ret.append(protocol_with_name(name))
     return ret

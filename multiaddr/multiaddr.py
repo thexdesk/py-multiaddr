@@ -3,13 +3,11 @@ from copy import copy
 
 import six
 
+from . import exceptions, protocols
+
 from .transforms import bytes_iter
 from .transforms import string_to_bytes
 from .transforms import bytes_to_string
-
-
-class ProtocolNotFoundException(Exception):
-    pass
 
 
 class Multiaddr(object):
@@ -18,7 +16,7 @@ class Multiaddr(object):
     Multiaddr is a cross-protocol, cross-platform format for representing
     internet addresses. It emphasizes explicitness and self-description.
 
-    Learn more here: https://github.com/jbenet/multiaddr
+    Learn more here: https://multiformats.io/multiaddr/
 
     Multiaddrs have both a binary and string representation.
 
@@ -49,7 +47,7 @@ class Multiaddr(object):
         elif isinstance(addr, six.binary_type):
             self._bytes = addr
         else:
-            raise ValueError("Invalid address type, must be bytes or str")
+            raise TypeError("MultiAddr must be bytes or str")
 
     def __eq__(self, other):
         """Checks if two Multiaddr objects are exactly equal."""
@@ -61,13 +59,9 @@ class Multiaddr(object):
     def __str__(self):
         """Return the string representation of this Multiaddr.
 
-        May raise an exception if the internal state of the Multiaddr is
-        corrupted."""
-        try:
-            return bytes_to_string(self._bytes)
-        except Exception:
-            raise ValueError(
-                "multiaddr failed to convert back to string. corrupted?")
+        May raise a :class:`~multiaddr.exceptions.BinaryParseError` if the
+        stored MultiAddr binary representation is invalid."""
+        return bytes_to_string(self._bytes)
 
     # On Python 2 __str__ needs to return binary text, so expose the original
     # function as __unicode__ and transparently encode its returned text based
@@ -113,25 +107,28 @@ class Multiaddr(object):
         except ValueError:
             # if multiaddr not contained, returns a copy
             return copy(self)
-        try:
-            return Multiaddr(s1[:idx])
-        except Exception as ex:
-            raise ValueError(
-                "Multiaddr.decapsulate incorrect byte boundaries: %s"
-                % str(ex))
+        return Multiaddr(s1[:idx])
 
-    def value_for_protocol(self, code):
+    def value_for_protocol(self, proto):
         """Return the value (if any) following the specified protocol."""
-        if not isinstance(code, int):
-            raise ValueError("code type should be `int`, code={}".format(code))
+        if not isinstance(proto, protocols.Protocol):
+            if isinstance(proto, int):
+                proto = protocols.protocol_with_code(proto)
+            elif isinstance(proto, six.string_types):
+                proto = protocols.protocol_with_name(proto)
+            else:
+                raise TypeError("Protocol object, name or code expected, got {0!r}".format(proto))
 
-        for proto, codec, part in bytes_iter(self.to_bytes()):
-            if proto.code == code:
+        for proto2, codec, part in bytes_iter(self.to_bytes()):
+            if proto2 == proto:
                 if codec.SIZE != 0:
-                    # If we have an address, return it
-                    return codec.to_string(proto, part)
+                    try:
+                        # If we have an address, return it
+                        return codec.to_string(proto2, part)
+                    except Exception as exc:
+                        six.raise_from(exceptions.BinaryParseError(str(exc), self.to_bytes(), proto2.name, exc), exc)
                 else:
                     # We were given something like '/utp', which doesn't have
                     # an address, so return ''
                     return ''
-        raise ProtocolNotFoundException()
+        raise exceptions.ProtocolLookupError(proto, str(self))

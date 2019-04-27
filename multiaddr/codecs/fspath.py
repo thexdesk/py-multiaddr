@@ -17,19 +17,19 @@ else:  # PY2
     import sys
 
     def fsencode(path):
-        if not isinstance(path, six.binary_type):
+        if not isinstance(path, six.binary_type):  # pragma: no cover
             path = path.encode(sys.getfilesystemencoding())
         return path
 
     def fsdecode(path):
-        if not isinstance(path, six.text_type):
+        if not isinstance(path, six.text_type):  # pragma: no cover
             path = path.decode(sys.getfilesystemencoding())
         return path
 
 
 def to_bytes(proto, string):
-	return fsencode(string)
+    return fsencode(string)
 
 
 def to_string(proto, buf):
-	return fsdecode(buf)
+    return fsdecode(buf)

@@ -5,10 +5,15 @@ from __future__ import unicode_literals
 import pytest
 import six
 
+from multiaddr.exceptions import BinaryParseError
+from multiaddr.exceptions import ProtocolLookupError
+from multiaddr.exceptions import ProtocolNotFoundError
+from multiaddr.exceptions import StringParseError
+
 from multiaddr.multiaddr import Multiaddr
-from multiaddr.multiaddr import ProtocolNotFoundException
 from multiaddr.protocols import protocol_with_name
 from multiaddr.protocols import protocols_with_string
+from multiaddr.protocols import P_DNS
 from multiaddr.protocols import P_IP4
 from multiaddr.protocols import P_IP6
 from multiaddr.protocols import P_P2P
@@ -52,7 +57,7 @@ from multiaddr.protocols import P_UNIX
      "/dns6",
      "/cancer"])
 def test_invalid(addr_str):
-    with pytest.raises(ValueError):
+    with pytest.raises(StringParseError):
         Multiaddr(addr_str)
 
 
@@ -136,6 +141,8 @@ def test_protocols():
      ("ip4/udp/////////",
       [protocol_with_name("ip4"), protocol_with_name("udp")]),
      ("////////ip4/tcp////////",
+      [protocol_with_name("ip4"), protocol_with_name("tcp")]),
+     ("////////ip4/////////tcp////////",
       [protocol_with_name("ip4"), protocol_with_name("tcp")])])
 def test_protocols_with_string(proto_string, expected):
     protos = protocols_with_string(proto_string)
@@ -146,10 +153,9 @@ def test_protocols_with_string(proto_string, expected):
     'proto_string',
     ["dsijafd",
      "/ip4/tcp/fidosafoidsa",
-     "////////ip4/tcp/21432141/////////",
-     "////////ip4///////tcp/////////"])
+     "////////ip4/tcp/21432141/////////"])
 def test_invalid_protocols_with_string(proto_string):
-    with pytest.raises(ValueError):
+    with pytest.raises(ProtocolNotFoundError):
         protocols_with_string(proto_string)
 
 
@@ -189,9 +195,25 @@ def test_get_value():
     assert_value_for_proto(ma, P_UDP, "1234")
     assert_value_for_proto(
         ma, P_P2P, "QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
+    assert_value_for_proto(ma, "ip4", "127.0.0.1")
+    assert_value_for_proto(ma, "utp", "")
+    assert_value_for_proto(ma, "tcp", "5555")
+    assert_value_for_proto(ma, "udp", "1234")
+    assert_value_for_proto(ma, protocol_with_name("ip4"), "127.0.0.1")
+    assert_value_for_proto(ma, protocol_with_name("utp"), "")
+    assert_value_for_proto(ma, protocol_with_name("tcp"), "5555")
+    assert_value_for_proto(ma, protocol_with_name("udp"), "1234")
 
-    with pytest.raises(ProtocolNotFoundException):
+    with pytest.raises(ProtocolLookupError):
         ma.value_for_protocol(P_IP6)
+    with pytest.raises(ProtocolLookupError):
+        ma.value_for_protocol("ip6")
+    with pytest.raises(ProtocolLookupError):
+        ma.value_for_protocol(protocol_with_name("ip6"))
+
+    a = Multiaddr(b"\x35\x03a:b")  # invalid protocol value
+    with pytest.raises(BinaryParseError):
+        a.value_for_protocol(P_DNS)
 
     a = Multiaddr("/ip4/0.0.0.0")  # only one addr
     assert_value_for_proto(a, P_IP4, "0.0.0.0")
@@ -223,35 +245,34 @@ def test_bad_initialization_too_many_params():
 
 
 def test_bad_initialization_wrong_type():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         Multiaddr(42)
 
 
 def test_value_for_protocol_argument_wrong_type():
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
-    with pytest.raises(ValueError):
+    with pytest.raises(ProtocolNotFoundError):
         a.value_for_protocol('str123')
+
+
+def test_value_for_protocol_argument_wrong_type():
+    a = Multiaddr("/ip4/127.0.0.1/udp/1234")
+    with pytest.raises(TypeError):
+        a.value_for_protocol(None)
 
 
 def test_multi_addr_str_corruption():
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
     a._bytes = b"047047047"
 
-    with pytest.raises(ValueError):
+    with pytest.raises(BinaryParseError):
         str(a)
 
 
-def test_decapsulate_corrupted_bytes(monkeypatch):
-    def raiseException(self, other):
-        raise Exception
-
+def test_decapsulate():
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
     u = Multiaddr("/udp/1234")
-    monkeypatch.setattr("multiaddr.multiaddr.Multiaddr.__init__",
-                        raiseException)
-
-    with pytest.raises(ValueError):
-        a.decapsulate(u)
+    assert a.decapsulate(u) == Multiaddr("/ip4/127.0.0.1")
 
 
 def test__repr():
