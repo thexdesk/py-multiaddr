@@ -123,7 +123,7 @@ def _uvarint(buf):
     for i, b_str in enumerate(buf):
         if six.PY3:
             b = b_str
-        else:
+        else:  # pragma: no cover (PY2)
             b = int(binascii.b2a_hex(b_str), 16)
         if b < 0x80:
             if i > 9 or (i == 9 and b > 1):

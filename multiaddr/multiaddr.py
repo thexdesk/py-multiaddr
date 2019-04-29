@@ -39,7 +39,7 @@ class Multiaddr(object):
         # On Python 2 text string will often be binary anyways so detect the
         # obvious case of a “binary-encoded” multiaddr starting with a slash
         # and decode it into text
-        if six.PY2 and isinstance(addr, str) and addr.startswith("/"):
+        if six.PY2 and isinstance(addr, str) and addr.startswith("/"):  # pragma: no cover (PY2)
             addr = addr.decode("utf-8")
 
         if isinstance(addr, six.text_type):
@@ -66,7 +66,7 @@ class Multiaddr(object):
     # On Python 2 __str__ needs to return binary text, so expose the original
     # function as __unicode__ and transparently encode its returned text based
     # on the current locale
-    if six.PY2:
+    if six.PY2:  # pragma: no cover (PY2)
         __unicode__ = __str__
 
         def __str__(self):

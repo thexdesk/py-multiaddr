@@ -13,16 +13,16 @@ IS_PATH = True
 if hasattr(os, "fsencode") and hasattr(os, "fsdecode"):
     fsencode = os.fsencode
     fsdecode = os.fsdecode
-else:  # PY2
+else:  # pragma: no cover (PY2)
     import sys
 
     def fsencode(path):
-        if not isinstance(path, six.binary_type):  # pragma: no cover
+        if not isinstance(path, six.binary_type):
             path = path.encode(sys.getfilesystemencoding())
         return path
 
     def fsdecode(path):
-        if not isinstance(path, six.text_type):  # pragma: no cover
+        if not isinstance(path, six.text_type):
             path = path.decode(sys.getfilesystemencoding())
         return path
 
