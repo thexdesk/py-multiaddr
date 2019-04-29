@@ -14,9 +14,6 @@ from .protocols import read_varint_code
 
 
 def string_to_bytes(string):
-    if not string:
-        return b''
-
     bs = []
     for proto, codec, value in string_iter(string):
         bs.append(varint.encode(proto.code))

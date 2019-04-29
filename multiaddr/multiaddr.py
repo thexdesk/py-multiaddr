@@ -188,8 +188,8 @@ class Multiaddr(collections.abc.Mapping):
         For example:
             /ip4/1.2.3.4/tcp/80 decapsulate /ip4/1.2.3.4 = /tcp/80
         """
-        s1 = str(self)
-        s2 = str(other)
+        s1 = self.to_bytes()
+        s2 = other.to_bytes()
         try:
             idx = s1.rindex(s2)
         except ValueError:
