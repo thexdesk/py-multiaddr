@@ -110,7 +110,21 @@ class Multiaddr(object):
         return Multiaddr(s1[:idx])
 
     def value_for_protocol(self, proto):
-        """Return the value (if any) following the specified protocol."""
+        """Return the value (if any) following the specified protocol
+        
+        Returns
+        -------
+        union[object, NoneType]
+            The parsed protocol value for the given protocol code or ``None``
+            if the given protocol does not require any value
+        
+        Raises
+        ------
+        ~multiaddr.exceptions.BinaryParseError
+            The stored MultiAddr binary representation is invalid
+        ~multiaddr.exceptions.ProtocolLookupError
+            MultiAddr does not contain any instance of this protocol
+        """
         if not isinstance(proto, protocols.Protocol):
             if isinstance(proto, int):
                 proto = protocols.protocol_with_code(proto)
@@ -129,6 +143,6 @@ class Multiaddr(object):
                         six.raise_from(exceptions.BinaryParseError(str(exc), self.to_bytes(), proto2.name, exc), exc)
                 else:
                     # We were given something like '/utp', which doesn't have
-                    # an address, so return ''
-                    return ''
+                    # an address, so return None
+                    return None
         raise exceptions.ProtocolLookupError(proto, str(self))

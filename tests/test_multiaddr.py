@@ -190,17 +190,17 @@ def test_get_value():
         "p2p/QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
 
     assert_value_for_proto(ma, P_IP4, "127.0.0.1")
-    assert_value_for_proto(ma, P_UTP, "")
+    assert_value_for_proto(ma, P_UTP, None)
     assert_value_for_proto(ma, P_TCP, "5555")
     assert_value_for_proto(ma, P_UDP, "1234")
     assert_value_for_proto(
         ma, P_P2P, "QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
     assert_value_for_proto(ma, "ip4", "127.0.0.1")
-    assert_value_for_proto(ma, "utp", "")
+    assert_value_for_proto(ma, "utp", None)
     assert_value_for_proto(ma, "tcp", "5555")
     assert_value_for_proto(ma, "udp", "1234")
     assert_value_for_proto(ma, protocol_with_name("ip4"), "127.0.0.1")
-    assert_value_for_proto(ma, protocol_with_name("utp"), "")
+    assert_value_for_proto(ma, protocol_with_name("utp"), None)
     assert_value_for_proto(ma, protocol_with_name("tcp"), "5555")
     assert_value_for_proto(ma, protocol_with_name("udp"), "1234")
 
@@ -224,7 +224,7 @@ def test_get_value():
     a = Multiaddr("/ip4/0.0.0.0/udp/12345/utp")  # ending in a no-value one.
     assert_value_for_proto(a, P_IP4, "0.0.0.0")
     assert_value_for_proto(a, P_UDP, "12345")
-    assert_value_for_proto(a, P_UTP, "")
+    assert_value_for_proto(a, P_UTP, None)
 
     a = Multiaddr("/ip4/0.0.0.0/unix/a/b/c/d")  # ending in a path one.
     assert_value_for_proto(a, P_IP4, "0.0.0.0")
