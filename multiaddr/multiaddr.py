@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+try:
+	import collections.abc
+except ImportError:  # pragma: no cover (PY2)
+	import collections
+	collections.abc = collections
 from copy import copy
 
 import six
@@ -10,7 +15,76 @@ from .transforms import string_to_bytes
 from .transforms import bytes_to_string
 
 
-class Multiaddr(object):
+__all__ = ("Multiaddr",)
+
+
+
+class MultiAddrKeys(collections.abc.KeysView, collections.abc.Sequence):
+    def __contains__(self, proto):
+        proto = protocols.protocol_with_any(proto)
+        return collections.abc.Sequence.__contains__(self, proto)
+
+    def __getitem__(self, idx):
+        if idx < 0:
+            idx = len(self)+idx
+        for idx2, proto in enumerate(self):
+            if idx2 == idx:
+                return proto
+        raise IndexError("Protocol list index out of range")
+
+    __hash__ = collections.abc.KeysView._hash
+
+    def __iter__(self):
+        for proto, _, _ in bytes_iter(self._mapping.to_bytes()):
+            yield proto
+
+
+class MultiAddrItems(collections.abc.ItemsView, collections.abc.Sequence):
+    def __contains__(self, item):
+        proto, value = item
+        proto = protocols.protocol_with_any(proto)
+        return collections.abc.Sequence.__contains__(self, (proto, value))
+
+    def __getitem__(self, idx):
+        if idx < 0:
+            idx = len(self)+idx
+        for idx2, item in enumerate(self):
+            if idx2 == idx:
+                return item
+        raise IndexError("Protocol item list index out of range")
+
+    def __iter__(self):
+        for proto, codec, part in bytes_iter(self._mapping.to_bytes()):
+            if codec.SIZE != 0:
+                try:
+                    # If we have an address, return it
+                    yield proto, codec.to_string(proto, part)
+                except Exception as exc:
+                    six.raise_from(exceptions.BinaryParseError(str(exc), self._mapping.to_bytes(), proto.name, exc), exc)
+            else:
+                # We were given something like '/utp', which doesn't have
+                # an address, so return None
+                yield proto, None
+
+
+class MultiAddrValues(collections.abc.ValuesView, collections.abc.Sequence):
+    __contains__ = collections.abc.Sequence.__contains__
+
+    def __getitem__(self, idx):
+        if idx < 0:
+            idx = len(self)+idx
+        for idx2, proto in enumerate(self):
+            if idx2 == idx:
+                return proto
+        raise IndexError("Protocol value list index out of range")
+
+    def __iter__(self):
+        for _, value in MultiAddrItems(self._mapping):
+            yield value
+
+
+
+class Multiaddr(collections.abc.Mapping):
     """Multiaddr is a representation of multiple nested internet addresses.
 
     Multiaddr is a cross-protocol, cross-platform format for representing
@@ -53,15 +127,21 @@ class Multiaddr(object):
         """Checks if two Multiaddr objects are exactly equal."""
         return self._bytes == other._bytes
 
-    def __ne__(self, other):
-        return not (self == other)
-
     def __str__(self):
         """Return the string representation of this Multiaddr.
 
         May raise a :class:`~multiaddr.exceptions.BinaryParseError` if the
         stored MultiAddr binary representation is invalid."""
         return bytes_to_string(self._bytes)
+
+    def __contains__(self, proto):
+        return proto in MultiAddrKeys(self)
+
+    def __iter__(self):
+        return iter(MultiAddrKeys(self))
+
+    def __len__(self):
+        return sum((1 for _ in bytes_iter(self.to_bytes())))
 
     # On Python 2 __str__ needs to return binary text, so expose the original
     # function as __unicode__ and transparently encode its returned text based
@@ -82,7 +162,15 @@ class Multiaddr(object):
 
     def protocols(self):
         """Returns a list of Protocols this Multiaddr includes."""
-        return list(proto for proto, _, _ in bytes_iter(self.to_bytes()))
+        return MultiAddrKeys(self)
+
+    keys = protocols
+
+    def items(self):
+        return MultiAddrItems(self)
+
+    def values(self):
+        return MultiAddrValues(self)
 
     def encapsulate(self, other):
         """Wrap this Multiaddr around another.
@@ -125,24 +213,10 @@ class Multiaddr(object):
         ~multiaddr.exceptions.ProtocolLookupError
             MultiAddr does not contain any instance of this protocol
         """
-        if not isinstance(proto, protocols.Protocol):
-            if isinstance(proto, int):
-                proto = protocols.protocol_with_code(proto)
-            elif isinstance(proto, six.string_types):
-                proto = protocols.protocol_with_name(proto)
-            else:
-                raise TypeError("Protocol object, name or code expected, got {0!r}".format(proto))
-
-        for proto2, codec, part in bytes_iter(self.to_bytes()):
-            if proto2 == proto:
-                if codec.SIZE != 0:
-                    try:
-                        # If we have an address, return it
-                        return codec.to_string(proto2, part)
-                    except Exception as exc:
-                        six.raise_from(exceptions.BinaryParseError(str(exc), self.to_bytes(), proto2.name, exc), exc)
-                else:
-                    # We were given something like '/utp', which doesn't have
-                    # an address, so return None
-                    return None
+        proto = protocols.protocol_with_any(proto)
+        for proto2, value in self.items():
+            if proto2 is proto or proto2 == proto:
+                return value
         raise exceptions.ProtocolLookupError(proto, str(self))
+
+    __getitem__ = value_for_protocol

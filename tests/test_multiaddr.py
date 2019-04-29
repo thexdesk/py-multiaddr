@@ -234,6 +234,34 @@ def test_get_value():
     assert_value_for_proto(a, P_UNIX, "/studio")  # only a path.
 
 
+def test_views():
+    ma = Multiaddr(
+        "/ip4/127.0.0.1/utp/tcp/5555/udp/1234/utp/"
+        "p2p/QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
+
+    for idx, (proto1, proto2, item, value) in enumerate(zip(ma, ma.keys(), ma.items(), ma.values())):
+        assert (proto1, value) == (proto2, value) == item
+        assert proto1 in ma
+        assert proto2 in ma.keys()
+        assert item in ma.items()
+        assert value in ma.values()
+        assert ma.keys()[idx] == ma.keys()[idx-len(ma)] == proto1 == proto2
+        assert ma.items()[idx] == ma.items()[idx-len(ma)] == item
+        assert ma.values()[idx] == ma.values()[idx-len(ma)] == ma[proto1] == value
+
+    assert len(ma.keys()) == len(ma.items()) == len(ma.values()) == len(ma)
+    assert len(list(ma.keys())) == len(ma.keys())
+    assert len(list(ma.items())) == len(ma.items())
+    assert len(list(ma.values())) == len(ma.values())
+    
+    with pytest.raises(IndexError):
+        ma.keys()[len(ma)]
+    with pytest.raises(IndexError):
+        ma.items()[len(ma)]
+    with pytest.raises(IndexError):
+        ma.values()[len(ma)]
+
+
 def test_bad_initialization_no_params():
     with pytest.raises(TypeError):
         Multiaddr()

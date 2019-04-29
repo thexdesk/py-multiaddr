@@ -100,13 +100,16 @@ class Protocol(object):
         return varint.encode(self.code)
 
     def __eq__(self, other):
+        if not isinstance(other, Protocol):
+            return NotImplemented
+
         return all((self.code == other.code,
                     self.name == other.name,
                     self.codec == other.codec,
                     self.path == other.path))
 
-    def __ne__(self, other):
-        return not self == other
+    def __hash__(self):
+        return self.code
 
     def __repr__(self):
         return "Protocol(code={code!r}, name={name!r}, codec={codec!r})".format(
@@ -198,6 +201,17 @@ def protocol_with_code(code):
     if code not in _codes_to_protocols:
         raise exceptions.ProtocolNotFoundError(code, "code")
     return _codes_to_protocols[code]
+
+
+def protocol_with_any(proto):
+    if isinstance(proto, Protocol):
+        return proto
+    elif isinstance(proto, int):
+        return protocol_with_code(proto)
+    elif isinstance(proto, six.string_types):
+        return protocol_with_name(proto)
+    else:
+        raise TypeError("Protocol object, name or code expected, got {0!r}".format(proto))
 
 
 def protocols_with_string(string):
