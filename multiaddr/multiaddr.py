@@ -4,7 +4,6 @@ try:
 except ImportError:  # pragma: no cover (PY2)
 	import collections
 	collections.abc = collections
-from copy import copy
 
 import six
 
@@ -120,8 +119,10 @@ class Multiaddr(collections.abc.Mapping):
             self._bytes = string_to_bytes(addr)
         elif isinstance(addr, six.binary_type):
             self._bytes = addr
+        elif isinstance(addr, Multiaddr):
+            self._bytes = addr.to_bytes()
         else:
-            raise TypeError("MultiAddr must be bytes or str")
+            raise TypeError("MultiAddr must be bytes, str or another MultiAddr instance")
 
     def __eq__(self, other):
         """Checks if two Multiaddr objects are exactly equal."""
@@ -179,7 +180,7 @@ class Multiaddr(collections.abc.Mapping):
             /ip4/1.2.3.4 encapsulate /tcp/80 = /ip4/1.2.3.4/tcp/80
         """
         mb = self.to_bytes()
-        ob = other.to_bytes()
+        ob = Multiaddr(other).to_bytes()
         return Multiaddr(b''.join([mb, ob]))
 
     def decapsulate(self, other):
@@ -189,12 +190,12 @@ class Multiaddr(collections.abc.Mapping):
             /ip4/1.2.3.4/tcp/80 decapsulate /ip4/1.2.3.4 = /tcp/80
         """
         s1 = self.to_bytes()
-        s2 = other.to_bytes()
+        s2 = Multiaddr(other).to_bytes()
         try:
             idx = s1.rindex(s2)
         except ValueError:
             # if multiaddr not contained, returns a copy
-            return copy(self)
+            return Multiaddr(self)
         return Multiaddr(s1[:idx])
 
     def value_for_protocol(self, proto):
