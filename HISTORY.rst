@@ -2,6 +2,13 @@
 History
 =======
 
+0.0.5 (2019-5-7)
+----------------
+
+* unhexilified bytes
+* new exceptions
+* miscellaneous improvements [via alexander255_ `#42`_]
+
 0.0.2 (2016-5-4)
 ----------------
 
