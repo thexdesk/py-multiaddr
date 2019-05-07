@@ -1,2 +1,2 @@
 [flake8]
-exclude = multiaddr/protocols.csv
+max-line-length = 100

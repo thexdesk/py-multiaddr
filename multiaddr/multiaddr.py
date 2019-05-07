@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 try:
-	import collections.abc
+    import collections.abc
 except ImportError:  # pragma: no cover (PY2)
-	import collections
-	collections.abc = collections
+    import collections
+    collections.abc = collections
 
 import six
 
@@ -15,7 +15,6 @@ from .transforms import bytes_to_string
 
 
 __all__ = ("Multiaddr",)
-
 
 
 class MultiAddrKeys(collections.abc.KeysView, collections.abc.Sequence):
@@ -59,7 +58,15 @@ class MultiAddrItems(collections.abc.ItemsView, collections.abc.Sequence):
                     # If we have an address, return it
                     yield proto, codec.to_string(proto, part)
                 except Exception as exc:
-                    six.raise_from(exceptions.BinaryParseError(str(exc), self._mapping.to_bytes(), proto.name, exc), exc)
+                    six.raise_from(
+                        exceptions.BinaryParseError(
+                            str(exc),
+                            self._mapping.to_bytes(),
+                            proto.name,
+                            exc,
+                        ),
+                        exc,
+                    )
             else:
                 # We were given something like '/utp', which doesn't have
                 # an address, so return None
@@ -80,7 +87,6 @@ class MultiAddrValues(collections.abc.ValuesView, collections.abc.Sequence):
     def __iter__(self):
         for _, value in MultiAddrItems(self._mapping):
             yield value
-
 
 
 class Multiaddr(collections.abc.Mapping):
@@ -200,13 +206,13 @@ class Multiaddr(collections.abc.Mapping):
 
     def value_for_protocol(self, proto):
         """Return the value (if any) following the specified protocol
-        
+
         Returns
         -------
         union[object, NoneType]
             The parsed protocol value for the given protocol code or ``None``
             if the given protocol does not require any value
-        
+
         Raises
         ------
         ~multiaddr.exceptions.BinaryParseError
