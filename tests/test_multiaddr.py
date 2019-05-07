@@ -29,6 +29,9 @@ from multiaddr.protocols import P_UNIX
      "/ip4/::1",
      "/ip4/fdpsofodsajfdoisa",
      "/ip6",
+     "/ip6zone",
+     "/ip6zone/",
+     "/ip6zone//ip6/fe80::1",
      "/udp",
      "/tcp",
      "/sctp",
@@ -67,6 +70,9 @@ def test_invalid(addr_str):
      "/ip4/0.0.0.0",
      "/ip6/::1",
      "/ip6/2601:9:4f81:9700:803e:ca65:66e8:c21",
+     "/ip6zone/x/ip6/fe80::1",
+     "/ip6zone/x%y/ip6/fe80::1",
+     "/ip6zone/x%y/ip6/::",
      "/onion/timaq4ygg2iegci7:1234",
      "/onion/timaq4ygg2iegci7:80/http",
      "/udp/0",
@@ -330,3 +336,14 @@ def test_decapsulate():
 def test__repr():
     a = Multiaddr("/ip4/127.0.0.1/udp/1234")
     assert(repr(a) == "<Multiaddr %s>" % str(a))
+
+
+def test_zone():
+    ip6_string = "/ip6zone/eth0/ip6/::1"
+    ip6_bytes = b"\x2a\x04eth0\x29\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01"
+
+    maddr_from_str = Multiaddr(ip6_string)
+    assert maddr_from_str.to_bytes() == ip6_bytes
+
+    maddr_from_bytes = Multiaddr(ip6_bytes)
+    assert str(maddr_from_bytes) == ip6_string
