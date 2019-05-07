@@ -12,7 +12,7 @@ IS_PATH = False
 
 def to_bytes(proto, string):
     # the address is a base58-encoded string
-    if six.PY2 and isinstance(string, unicode):
+    if six.PY2 and isinstance(string, unicode):  # pragma: no cover (PY2)
         string = string.encode("ascii")
     mm = base58.b58decode(string)
     if len(mm) < 5:

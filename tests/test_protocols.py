@@ -72,6 +72,7 @@ def test_protocol_with_name():
     assert proto.code == protocols.P_IP4
     assert proto.size == 32
     assert proto.vcode == varint.encode(protocols.P_IP4)
+    assert hash(proto) == protocols.P_IP4
 
     with pytest.raises(exceptions.ProtocolNotFoundError):
         proto = protocols.protocol_with_name('foo')
@@ -83,6 +84,7 @@ def test_protocol_with_code():
     assert proto.code == protocols.P_IP4
     assert proto.size == 32
     assert proto.vcode == varint.encode(protocols.P_IP4)
+    assert hash(proto) == protocols.P_IP4
 
     with pytest.raises(exceptions.ProtocolNotFoundError):
         proto = protocols.protocol_with_code(1234)
@@ -95,6 +97,8 @@ def test_protocol_equality():
 
     assert proto1 == proto2
     assert proto1 != proto3
+    assert proto1 != None
+    assert proto2 != str(proto2)
 
 
 @pytest.mark.parametrize("names", [['ip4'],

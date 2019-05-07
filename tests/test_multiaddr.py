@@ -190,17 +190,17 @@ def test_get_value():
         "p2p/QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
 
     assert_value_for_proto(ma, P_IP4, "127.0.0.1")
-    assert_value_for_proto(ma, P_UTP, "")
+    assert_value_for_proto(ma, P_UTP, None)
     assert_value_for_proto(ma, P_TCP, "5555")
     assert_value_for_proto(ma, P_UDP, "1234")
     assert_value_for_proto(
         ma, P_P2P, "QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
     assert_value_for_proto(ma, "ip4", "127.0.0.1")
-    assert_value_for_proto(ma, "utp", "")
+    assert_value_for_proto(ma, "utp", None)
     assert_value_for_proto(ma, "tcp", "5555")
     assert_value_for_proto(ma, "udp", "1234")
     assert_value_for_proto(ma, protocol_with_name("ip4"), "127.0.0.1")
-    assert_value_for_proto(ma, protocol_with_name("utp"), "")
+    assert_value_for_proto(ma, protocol_with_name("utp"), None)
     assert_value_for_proto(ma, protocol_with_name("tcp"), "5555")
     assert_value_for_proto(ma, protocol_with_name("udp"), "1234")
 
@@ -224,7 +224,7 @@ def test_get_value():
     a = Multiaddr("/ip4/0.0.0.0/udp/12345/utp")  # ending in a no-value one.
     assert_value_for_proto(a, P_IP4, "0.0.0.0")
     assert_value_for_proto(a, P_UDP, "12345")
-    assert_value_for_proto(a, P_UTP, "")
+    assert_value_for_proto(a, P_UTP, None)
 
     a = Multiaddr("/ip4/0.0.0.0/unix/a/b/c/d")  # ending in a path one.
     assert_value_for_proto(a, P_IP4, "0.0.0.0")
@@ -232,6 +232,34 @@ def test_get_value():
 
     a = Multiaddr("/unix/studio")
     assert_value_for_proto(a, P_UNIX, "/studio")  # only a path.
+
+
+def test_views():
+    ma = Multiaddr(
+        "/ip4/127.0.0.1/utp/tcp/5555/udp/1234/utp/"
+        "p2p/QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
+
+    for idx, (proto1, proto2, item, value) in enumerate(zip(ma, ma.keys(), ma.items(), ma.values())):
+        assert (proto1, value) == (proto2, value) == item
+        assert proto1 in ma
+        assert proto2 in ma.keys()
+        assert item in ma.items()
+        assert value in ma.values()
+        assert ma.keys()[idx] == ma.keys()[idx-len(ma)] == proto1 == proto2
+        assert ma.items()[idx] == ma.items()[idx-len(ma)] == item
+        assert ma.values()[idx] == ma.values()[idx-len(ma)] == ma[proto1] == value
+
+    assert len(ma.keys()) == len(ma.items()) == len(ma.values()) == len(ma)
+    assert len(list(ma.keys())) == len(ma.keys())
+    assert len(list(ma.items())) == len(ma.items())
+    assert len(list(ma.values())) == len(ma.values())
+    
+    with pytest.raises(IndexError):
+        ma.keys()[len(ma)]
+    with pytest.raises(IndexError):
+        ma.items()[len(ma)]
+    with pytest.raises(IndexError):
+        ma.values()[len(ma)]
 
 
 def test_bad_initialization_no_params():
