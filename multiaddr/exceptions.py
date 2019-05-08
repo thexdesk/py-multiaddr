@@ -10,11 +10,11 @@ class ProtocolLookupError(LookupError):
     """
     MultiAddr did not contain a protocol with the requested code
     """
-    
+
     def __init__(self, proto, string):
-        self.proto  = proto
+        self.proto = proto
         self.string = string
-        
+
         super(ProtocolLookupError, self).__init__(
             "MultiAddr {0!r} does not contain protocol {1}".format(string, proto)
         )
@@ -30,8 +30,8 @@ class StringParseError(ParseError):
     """
 
     def __init__(self, message, string, protocol=None, original=None):
-        self.message  = message
-        self.string   = string
+        self.message = message
+        self.string = string
         self.protocol = protocol
         self.original = original
 
@@ -49,8 +49,8 @@ class BinaryParseError(ParseError):
     """
 
     def __init__(self, message, binary, protocol, original=None):
-        self.message  = message
-        self.binary   = binary
+        self.message = message
+        self.binary = binary
         self.protocol = protocol
         self.original = original
 
@@ -69,11 +69,12 @@ class ProtocolExistsError(ProtocolManagerError):
     """
     def __init__(self, proto, kind="name"):
         self.proto = proto
-        self.kind  = kind
+        self.kind = kind
 
         super(ProtocolExistsError, self).__init__(
             "Protocol with {0} {1!r} already exists".format(kind, getattr(proto, kind))
         )
+
 
 class ProtocolNotFoundError(ProtocolManagerError):
     """
@@ -81,7 +82,7 @@ class ProtocolNotFoundError(ProtocolManagerError):
     """
     def __init__(self, value, kind="name"):
         self.value = value
-        self.kind  = kind
+        self.kind = kind
 
         super(ProtocolNotFoundError, self).__init__(
             "No protocol with {0} {1!r} found".format(kind, value)

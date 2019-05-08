@@ -97,7 +97,7 @@ def test_protocol_equality():
 
     assert proto1 == proto2
     assert proto1 != proto3
-    assert proto1 != None
+    assert proto1 is not None
     assert proto2 != str(proto2)
 
 

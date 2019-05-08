@@ -12,7 +12,6 @@ from .protocols import protocol_with_name
 from .protocols import read_varint_code
 
 
-
 def string_to_bytes(string):
     bs = []
     for proto, codec, value in string_iter(string):
@@ -90,7 +89,14 @@ def bytes_iter(buf):
             proto = protocol_with_code(code)
             codec = codec_by_name(proto.codec)
         except (ImportError, exceptions.ProtocolNotFoundError) as exc:
-            six.raise_from(exceptions.BinaryParseError("Unknown Protocol", buf, proto.name if proto else code), exc)
+            six.raise_from(
+                exceptions.BinaryParseError(
+                    "Unknown Protocol",
+                    buf,
+                    proto.name if proto else code,
+                ),
+                exc,
+            )
         size, num_bytes_read2 = size_for_addr(codec, buf[num_bytes_read:])
         length = size + num_bytes_read2 + num_bytes_read
         yield proto, codec, buf[(length - size):length]

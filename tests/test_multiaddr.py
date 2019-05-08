@@ -239,7 +239,7 @@ def test_views():
         "/ip4/127.0.0.1/utp/tcp/5555/udp/1234/utp/"
         "p2p/QmbHVEEepCi7rn7VL7Exxpd2Ci9NNB6ifvqwhsrbRMgQFP")
 
-    for idx, (proto1, proto2, item, value) in enumerate(zip(ma, ma.keys(), ma.items(), ma.values())):
+    for idx, (proto1, proto2, item, value) in enumerate(zip(ma, ma.keys(), ma.items(), ma.values())):  # noqa: E501
         assert (proto1, value) == (proto2, value) == item
         assert proto1 in ma
         assert proto2 in ma.keys()
@@ -253,7 +253,7 @@ def test_views():
     assert len(list(ma.keys())) == len(ma.keys())
     assert len(list(ma.items())) == len(ma.items())
     assert len(list(ma.values())) == len(ma.values())
-    
+
     with pytest.raises(IndexError):
         ma.keys()[len(ma)]
     with pytest.raises(IndexError):
@@ -282,9 +282,6 @@ def test_value_for_protocol_argument_wrong_type():
     with pytest.raises(ProtocolNotFoundError):
         a.value_for_protocol('str123')
 
-
-def test_value_for_protocol_argument_wrong_type():
-    a = Multiaddr("/ip4/127.0.0.1/udp/1234")
     with pytest.raises(TypeError):
         a.value_for_protocol(None)
 

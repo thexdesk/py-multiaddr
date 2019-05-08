@@ -67,7 +67,6 @@ _CODES = [
 ]
 
 
-
 class Protocol(object):
     __slots__ = [
         "code",   # int
@@ -80,7 +79,7 @@ class Protocol(object):
             raise TypeError("code must be an integer")
         if not isinstance(name, six.string_types):
             raise TypeError("name must be a string")
-        if not isinstance(codec, six.string_types) and not codec is None:
+        if not isinstance(codec, six.string_types) and codec is not None:
             raise TypeError("codec must be a string or None")
 
         self.code = code

@@ -13,6 +13,8 @@ class NoneCodec:
 
 
 CODEC_CACHE = {}
+
+
 def codec_by_name(name):
     if name is None:  # Special “do nothing – expect nothing” pseudo-codec
         return NoneCodec
