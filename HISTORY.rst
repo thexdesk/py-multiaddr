@@ -2,6 +2,12 @@
 History
 =======
 
+0.0.7 (2019-5-8)
+----------------
+
+* include subpackage
+* refactor util and codec
+
 0.0.5 (2019-5-7)
 ----------------
 

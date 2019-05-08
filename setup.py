@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import setuptools
 
 try:
     from setuptools import setup
@@ -16,7 +16,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 
-version = '0.0.5'
+version = '0.0.7'
 
 setup(
     name='multiaddr',
@@ -28,9 +28,7 @@ setup(
     url='https://github.com/multiformats/py-multiaddr',
     download_url=(
         'https://github.com/multiformats/py-multiaddr/tarball/%s' % version),
-    packages=[
-        'multiaddr',
-    ],
+    packages=setuptools.find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     package_dir={'multiaddr': 'multiaddr'},
     include_package_data=True,
     license='MIT License',

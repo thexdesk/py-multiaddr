@@ -1,5 +1,5 @@
 py-multiaddr
-############
+==========================
 
 .. image:: https://img.shields.io/pypi/v/multiaddr.svg
         :target: https://pypi.python.org/pypi/multiaddr
