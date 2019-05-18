@@ -6,6 +6,7 @@ except ImportError:  # pragma: no cover (PY2)
     collections.abc = collections
 
 import six
+import varint
 
 from . import exceptions, protocols
 
@@ -33,7 +34,7 @@ class MultiAddrKeys(collections.abc.KeysView, collections.abc.Sequence):
     __hash__ = collections.abc.KeysView._hash
 
     def __iter__(self):
-        for proto, _, _ in bytes_iter(self._mapping.to_bytes()):
+        for _, proto, _, _ in bytes_iter(self._mapping.to_bytes()):
             yield proto
 
 
@@ -52,7 +53,7 @@ class MultiAddrItems(collections.abc.ItemsView, collections.abc.Sequence):
         raise IndexError("Protocol item list index out of range")
 
     def __iter__(self):
-        for proto, codec, part in bytes_iter(self._mapping.to_bytes()):
+        for _, proto, codec, part in bytes_iter(self._mapping.to_bytes()):
             if codec.SIZE != 0:
                 try:
                     # If we have an address, return it
@@ -130,6 +131,12 @@ class Multiaddr(collections.abc.Mapping):
         else:
             raise TypeError("MultiAddr must be bytes, str or another MultiAddr instance")
 
+    @classmethod
+    def join(cls, *addrs):
+        """Concatenate the values of the given MultiAddr strings or objects,
+        encapsulating each successive MultiAddr value with the previous ones."""
+        return cls(b"".join(map(lambda a: cls(a).to_bytes(), addrs)))
+
     def __eq__(self, other):
         """Checks if two Multiaddr objects are exactly equal."""
         return self._bytes == other._bytes
@@ -171,6 +178,29 @@ class Multiaddr(collections.abc.Mapping):
         """Returns a list of Protocols this Multiaddr includes."""
         return MultiAddrKeys(self)
 
+    def split(self, maxsplit=-1):
+        """Returns the list of individual path components this MultiAddr is made
+        up of."""
+        final_split_offset = -1
+        results = []
+        for idx, (offset, proto, codec, part_value) in enumerate(bytes_iter(self._bytes)):
+            # Split at most `maxplit` times
+            if idx == maxsplit:
+                final_split_offset = offset
+                break
+
+            # Re-assemble binary MultiAddr representation
+            part_size = varint.encode(len(part_value)) if codec.SIZE < 0 else b""
+            part = b"".join((proto.vcode, part_size, part_value))
+
+            # Add MultiAddr with the given value
+            results.append(self.__class__(part))
+        # Add final item with remainder of MultiAddr if there is anything left
+        if final_split_offset >= 0:
+            results.append(self.__class__(self._bytes[final_split_offset:]))
+
+        return results
+
     keys = protocols
 
     def items(self):
@@ -185,9 +215,7 @@ class Multiaddr(collections.abc.Mapping):
         For example:
             /ip4/1.2.3.4 encapsulate /tcp/80 = /ip4/1.2.3.4/tcp/80
         """
-        mb = self.to_bytes()
-        ob = Multiaddr(other).to_bytes()
-        return Multiaddr(b''.join([mb, ob]))
+        return self.join(self, other)
 
     def decapsulate(self, other):
         """Remove a Multiaddr wrapping.
@@ -209,7 +237,7 @@ class Multiaddr(collections.abc.Mapping):
 
         Returns
         -------
-        union[object, NoneType]
+        Union[object, NoneType]
             The parsed protocol value for the given protocol code or ``None``
             if the given protocol does not require any value
 

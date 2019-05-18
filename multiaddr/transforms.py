@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import io
 import six
 import varint
 
@@ -9,7 +10,6 @@ from .codecs import codec_by_name
 
 from .protocols import protocol_with_code
 from .protocols import protocol_with_name
-from .protocols import read_varint_code
 
 
 def string_to_bytes(string):
@@ -29,7 +29,7 @@ def string_to_bytes(string):
 
 def bytes_to_string(buf):
     st = [u'']  # start with empty string so we get a leading slash on join()
-    for proto, codec, part in bytes_iter(buf):
+    for _, proto, codec, part in bytes_iter(buf):
         st.append(proto.name)
         if codec.SIZE != 0:
             try:
@@ -43,11 +43,11 @@ def bytes_to_string(buf):
     return u'/'.join(st)
 
 
-def size_for_addr(codec, buf):
+def size_for_addr(codec, buf_io):
     if codec.SIZE >= 0:
-        return codec.SIZE // 8, 0
+        return codec.SIZE // 8
     else:
-        return read_varint_code(buf)
+        return varint.decode_stream(buf_io)
 
 
 def string_iter(string):
@@ -82,8 +82,10 @@ def string_iter(string):
 
 
 def bytes_iter(buf):
-    while buf:
-        code, num_bytes_read = read_varint_code(buf)
+    buf_io = io.BytesIO(buf)
+    while buf_io.tell() < len(buf):
+        offset = buf_io.tell()
+        code = varint.decode_stream(buf_io)
         proto = None
         try:
             proto = protocol_with_code(code)
@@ -97,7 +99,5 @@ def bytes_iter(buf):
                 ),
                 exc,
             )
-        size, num_bytes_read2 = size_for_addr(codec, buf[num_bytes_read:])
-        length = size + num_bytes_read2 + num_bytes_read
-        yield proto, codec, buf[(length - size):length]
-        buf = buf[length:]
+        size = size_for_addr(codec, buf_io)
+        yield offset, proto, codec, buf_io.read(size)
