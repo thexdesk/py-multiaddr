@@ -9,7 +9,7 @@ IS_PATH = False
 
 def to_bytes(proto, string):
     if len(string) == 0:
-        raise ValueError("empty ip6zone")
+        raise ValueError("{0} value must not be empty".format(proto.name))
     return string.encode('utf-8')
 
 
