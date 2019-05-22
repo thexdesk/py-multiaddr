@@ -124,7 +124,7 @@ PROTOCOLS = [
     Protocol(P_UDP, 'udp', 'uint16be'),
     Protocol(P_DCCP, 'dccp', 'uint16be'),
     Protocol(P_IP6, 'ip6', 'ip6'),
-    Protocol(P_IP6ZONE, 'ip6zone', '?'),
+    Protocol(P_IP6ZONE, 'ip6zone', 'utf8'),
     Protocol(P_DNS, 'dns', 'idna'),
     Protocol(P_DNS4, 'dns4', 'idna'),
     Protocol(P_DNS6, 'dns6', 'idna'),
