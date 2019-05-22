@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import binascii
 import six
 import varint
 
@@ -116,31 +115,6 @@ class Protocol(object):
             name=self.name,
             codec=self.codec,
         )
-
-
-def _uvarint(buf):
-    """Reads a varint from a bytes buffer and returns the value and # bytes"""
-    x = 0
-    s = 0
-    for i, b_str in enumerate(buf):
-        if six.PY3:
-            b = b_str
-        else:  # pragma: no cover (PY2)
-            b = int(binascii.b2a_hex(b_str), 16)
-        if b < 0x80:
-            if i > 9 or (i == 9 and b > 1):
-                # Code 34 apparently means `OverflowError`
-                # (as opposed to other `ArithmeticError` types)
-                raise OverflowError(34, "UVarInt too large")
-            return (x | b << s, i + 1)
-        x |= (b & 0x7f) << s
-        s += 7
-    return 0, 0
-
-
-def read_varint_code(buf):
-    num, n = _uvarint(buf)
-    return int(num), n
 
 
 # Protocols is the list of multiaddr protocols supported by this module.

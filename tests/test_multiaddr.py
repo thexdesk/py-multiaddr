@@ -159,6 +159,33 @@ def test_invalid_protocols_with_string(proto_string):
         protocols_with_string(proto_string)
 
 
+@pytest.mark.parametrize(
+    'proto_string,maxsplit,expected',
+    [("/ip4/1.2.3.4", -1, ("/ip4/1.2.3.4",)),
+     ("/ip4/0.0.0.0", 0, ("/ip4/0.0.0.0",)),
+     ("/ip6/::1", 1, ("/ip6/::1",)),
+     ("/onion/timaq4ygg2iegci7:80/http", 0, ("/onion/timaq4ygg2iegci7:80/http",)),
+     ("/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234", 1,
+      ("/ip4/127.0.0.1", "/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234",)),
+     ("/ip4/1.2.3.4/tcp/80/unix/a/b/c/d/e/f", -1,
+      ("/ip4/1.2.3.4", "/tcp/80", "/unix/a/b/c/d/e/f"))])
+def test_split(proto_string, maxsplit, expected):
+    assert tuple(map(str, Multiaddr(proto_string).split(maxsplit))) == expected
+
+
+@pytest.mark.parametrize(
+    'proto_parts,expected',
+    [(("/ip4/1.2.3.4",), "/ip4/1.2.3.4"),
+     ((b"\x04\x00\x00\x00\x00",), "/ip4/0.0.0.0"),
+     (("/ip6/::1",), "/ip6/::1"),
+     (("/onion/timaq4ygg2iegci7:80/http",), "/onion/timaq4ygg2iegci7:80/http"),
+     ((b"\x04\x7F\x00\x00\x01", "/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234",),
+      "/ip4/127.0.0.1/p2p/QmcgpsyWgH8Y8ajJz1Cu72KnS5uo2Aa2LpzU7kinSupNKC/tcp/1234"),
+     (("/ip4/1.2.3.4", "/tcp/80", "/unix/a/b/c/d/e/f"), "/ip4/1.2.3.4/tcp/80/unix/a/b/c/d/e/f")])
+def test_join(proto_parts, expected):
+    assert str(Multiaddr.join(*proto_parts)) == expected
+
+
 def test_encapsulate():
     m1 = Multiaddr("/ip4/127.0.0.1/udp/1234")
     m2 = Multiaddr("/udp/5678")

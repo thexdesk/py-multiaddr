@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+import io
+
 import pytest
 
 from multiaddr.codecs import codec_by_name
@@ -57,7 +59,8 @@ BYTES_MAP_STR_TEST_DATA = [
     ('p2p', b'\x40\x50\x60\x51', (64, 1)),
 ])
 def test_size_for_addr(codec_name, buf, expected):
-    assert size_for_addr(codec_by_name(codec_name), buf) == expected
+    buf_io = io.BytesIO(buf)
+    assert (size_for_addr(codec_by_name(codec_name), buf_io), buf_io.tell()) == expected
 
 
 @pytest.mark.parametrize("buf, expected", [
@@ -69,7 +72,7 @@ def test_size_for_addr(codec_name, buf, expected):
       (_names_to_protocols["tcp"], b'\x10\xe1')]),
 ])
 def test_bytes_iter(buf, expected):
-    assert list((proto, val) for proto, _, val in bytes_iter(buf)) == expected
+    assert list((proto, val) for _, proto, _, val in bytes_iter(buf)) == expected
 
 
 @pytest.mark.parametrize("proto, buf, expected", ADDR_BYTES_MAP_STR_TEST_DATA)
