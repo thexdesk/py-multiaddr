@@ -16,7 +16,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 
-version = '0.0.7'
+version = '0.0.8'
 
 setup(
     name='multiaddr',
