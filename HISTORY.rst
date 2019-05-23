@@ -1,4 +1,3 @@
-=======
 History
 =======
 
@@ -14,6 +13,9 @@ History
 * unhexilified bytes
 * new exceptions
 * miscellaneous improvements [via alexander255_ `#42`_]
+
+.. _alexander255: https://github.com/alexander255
+.. _`#42`: https://github.com/multiformats/py-multiaddr/pull/42
 
 0.0.2 (2016-5-4)
 ----------------

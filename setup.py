@@ -23,6 +23,7 @@ setup(
     version=version,
     description="Python implementation of jbenet's multiaddr",
     long_description=readme + '\n\n' + history,
+    long_description_content_type="text/x-rst",
     author="Steven Buss",
     author_email='steven.buss@gmail.com',
     url='https://github.com/multiformats/py-multiaddr',
