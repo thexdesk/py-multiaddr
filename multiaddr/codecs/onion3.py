@@ -5,7 +5,7 @@ import struct
 import six
 
 
-SIZE = 37*8
+SIZE = 296
 IS_PATH = False
 
 
