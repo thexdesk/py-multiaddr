@@ -94,9 +94,11 @@ def test_protocol_equality():
     proto1 = protocols.protocol_with_name('ip4')
     proto2 = protocols.protocol_with_code(protocols.P_IP4)
     proto3 = protocols.protocol_with_name('onion')
+    proto4 = protocols.protocol_with_name('onion3')
 
     assert proto1 == proto2
     assert proto1 != proto3
+    assert proto3 != proto4
     assert proto1 is not None
     assert proto2 != str(proto2)
 
