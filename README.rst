@@ -4,8 +4,8 @@ py-multiaddr
 .. image:: https://img.shields.io/pypi/v/multiaddr.svg
         :target: https://pypi.python.org/pypi/multiaddr
 
-.. image:: https://travis-ci.org/multiformats/py-multiaddr.svg?branch=master
-        :target: https://travis-ci.org/multiformats/py-multiaddr
+.. image:: https://api.travis-ci.com/multiformats/py-multiaddr.svg?branch=master
+        :target: https://travis-ci.com/multiformats/py-multiaddr
 
 .. image:: https://codecov.io/github/multiformats/py-multiaddr/coverage.svg?branch=master
         :target: https://codecov.io/github/multiformats/py-multiaddr?branch=master
@@ -122,3 +122,4 @@ Dual-licensed:
 .. _standard-readme: https://github.com/RichardLitt/standard-readme
 .. _MIT: LICENSE-MIT
 .. _Apache 2: LICENSE-APACHE2
+.. _`@sbuss`: https://github.com/sbuss
